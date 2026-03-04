@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAK 论文解读指南</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #2d3748; line-height: 1.7; }
+  
+  .hero {
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+    color: white;
+    padding: 50px 40px;
+    text-align: center;
+  }
+  .hero h1 { font-size: 2.2em; margin-bottom: 10px; letter-spacing: 2px; }
+  .hero .subtitle { font-size: 1.1em; opacity: 0.8; margin-bottom: 20px; }
+  .hero .tag { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 16px; margin: 4px; font-size: 0.85em; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+
+  /* 导航卡片 */
+  .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 30px 0; }
+  .nav-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .nav-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+  .nav-card.active { border-color: #4299e1; background: #ebf8ff; }
+  .nav-card .icon { font-size: 2em; margin-bottom: 8px; }
+  .nav-card .label { font-size: 0.9em; font-weight: 600; color: #4a5568; }
+  .nav-card .step { font-size: 0.75em; color: #a0aec0; margin-top: 4px; }
+
+  /* 内容区块 */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .card h2 { font-size: 1.4em; color: #2d3748; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .card h3 { font-size: 1.1em; color: #4a5568; margin: 16px 0 8px; }
+
+  /* 问题提问区 */
+  .big-question {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .big-question .q-mark { font-size: 3em; margin-bottom: 10px; }
+  .big-question h2 { font-size: 1.5em; margin-bottom: 12px; }
+  .big-question p { opacity: 0.9; font-size: 1em; }
+
+  /* 类比说明 */
+  .analogy {
+    background: #fffbeb;
+    border-left: 4px solid #f6ad55;
+    border-radius: 0 12px 12px 0;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .analogy .title { font-weight: 700; color: #c05621; margin-bottom: 8px; font-size: 0.9em; }
+
+  /* 对比表格 */
+  .compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  .compare-table th { background: #2d3748; color: white; padding: 12px 16px; text-align: left; font-size: 0.9em; }
+  .compare-table td { padding: 11px 16px; border-bottom: 1px solid #e2e8f0; font-size: 0.9em; }
+  .compare-table tr:hover td { background: #f7fafc; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.8em; font-weight: 600; }
+  .badge.good { background: #c6f6d5; color: #276749; }
+  .badge.bad { background: #fed7d7; color: #9b2c2c; }
+  .badge.medium { background: #fefcbf; color: #744210; }
+
+  /* 流程图 */
+  .flow { display: flex; align-items: stretch; gap: 0; margin: 20px 0; flex-wrap: wrap; justify-content: center; }
+  .flow-step {
+    background: white;
+    border: 2px solid #4299e1;
+    border-radius: 12px;
+    padding: 16px 14px;
+    text-align: center;
+    flex: 1;
+    min-width: 110px;
+    max-width: 160px;
+    position: relative;
+    margin: 6px;
+    box-shadow: 0 2px 8px rgba(66,153,225,0.15);
+  }
+  .flow-step .step-num { background: #4299e1; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 700; margin: 0 auto 8px; }
+  .flow-step .step-icon { font-size: 1.8em; margin-bottom: 6px; }
+  .flow-step .step-name { font-size: 0.85em; font-weight: 700; color: #2d3748; }
+  .flow-step .step-desc { font-size: 0.75em; color: #718096; margin-top: 4px; }
+  .flow-arrow { font-size: 1.5em; color: #a0aec0; display: flex; align-items: center; margin: 0 -2px; }
+
+  /* 进度条 / 图表 */
+  .chart-row { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+  .chart-label { width: 140px; font-size: 0.85em; color: #4a5568; text-align: right; flex-shrink: 0; }
+  .chart-bar-wrap { flex: 1; background: #e2e8f0; border-radius: 20px; height: 22px; overflow: hidden; }
+  .chart-bar { height: 100%; border-radius: 20px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; font-size: 0.75em; color: white; font-weight: 700; transition: width 1s ease; }
+  .bar-trak { background: linear-gradient(90deg, #4299e1, #3182ce); }
+  .bar-data { background: linear-gradient(90deg, #48bb78, #38a169); }
+  .bar-tracin { background: linear-gradient(90deg, #ed8936, #dd6b20); }
+  .bar-if { background: linear-gradient(90deg, #a0aec0, #718096); }
+  .chart-val { width: 50px; font-size: 0.85em; font-weight: 700; color: #2d3748; }
+
+  /* 亮点卡片 */
+  .highlight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 16px 0; }
+  .highlight-card {
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .highlight-card .big-num { font-size: 2.5em; font-weight: 800; margin-bottom: 6px; }
+  .highlight-card .desc { font-size: 0.85em; }
+  .hc-blue { background: #ebf8ff; color: #2b6cb0; }
+  .hc-green { background: #f0fff4; color: #276749; }
+  .hc-purple { background: #faf5ff; color: #553c9a; }
+  .hc-orange { background: #fffaf0; color: #c05621; }
+
+  /* 词汇表 */
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .vocab-item { background: #f7fafc; border-radius: 10px; padding: 14px 18px; border-left: 3px solid #4299e1; }
+  .vocab-en { font-weight: 700; color: #2d3748; font-size: 0.95em; }
+  .vocab-zh { color: #4299e1; font-size: 0.85em; margin: 2px 0; }
+  .vocab-def { color: #718096; font-size: 0.82em; }
+
+  /* 应用场景 */
+  .app-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 16px 0; }
+  .app-card { background: #f7fafc; border-radius: 12px; padding: 20px; border-top: 3px solid; }
+  .app-card h4 { font-size: 0.95em; margin-bottom: 8px; }
+  .app-card p { font-size: 0.82em; color: #718096; }
+
+  /* 阅读技巧 */
+  .tip-box { background: #ebf8ff; border-radius: 12px; padding: 20px; margin: 12px 0; border: 1px solid #bee3f8; }
+  .tip-box .tip-title { font-weight: 700; color: #2b6cb0; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .tip-box p, .tip-box li { font-size: 0.88em; color: #2c5282; }
+  .tip-box ul { padding-left: 20px; }
+  .tip-box li { margin: 4px 0; }
+
+  /* 文章结构图 */
+  .structure { border-left: 3px solid #4299e1; padding-left: 20px; margin: 16px 0; }
+  .structure-item { margin: 10px 0; }
+  .structure-item .sec-title { font-weight: 700; color: #2d3748; font-size: 0.95em; }
+  .structure-item .sec-desc { color: #718096; font-size: 0.82em; margin-top: 2px; }
+  .structure-item .sec-tag { display: inline-block; background: #edf2f7; border-radius: 4px; padding: 1px 8px; font-size: 0.75em; color: #4a5568; margin-right: 6px; }
+
+  .inline-en { background: #edf2f7; border-radius: 4px; padding: 1px 6px; font-size: 0.88em; font-family: monospace; color: #4a5568; }
+
+  .progress-tracker { display: flex; gap: 8px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
+  .pt-item { background: white; border-radius: 8px; padding: 8px 16px; font-size: 0.82em; color: #718096; border: 1px solid #e2e8f0; }
+  .pt-item.done { background: #c6f6d5; color: #276749; border-color: #9ae6b4; }
+
+  /* 展开按钮（行内，打开用） */
+  .expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 9px 20px;
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 0.88em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 2px 8px rgba(66,153,225,0.35);
+    letter-spacing: 0.3px;
+  }
+  .expand-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(66,153,225,0.45); }
+  .expand-btn.open { background: linear-gradient(135deg, #48bb78, #38a169); box-shadow: 0 2px 8px rgba(72,187,120,0.4); }
+
+  /* 固定圆形收起按钮（展开后出现在右侧） */
+  .float-close-btn {
+    display: none;
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7em;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    transition: all 0.25s;
+    z-index: 999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0;
+  }
+  .float-close-btn:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    background: linear-gradient(135deg, #c53030, #9b2c2c);
+  }
+  .float-close-btn.visible { display: flex; animation: fadeInRight 0.25s ease; }
+  .float-close-btn .icon { font-size: 1.3em; line-height: 1; }
+  .float-close-btn .label { font-size: 0.72em; opacity: 0.9; }
+
+  @keyframes fadeInRight {
+    from { opacity: 0; transform: translateY(-50%) translateX(20px); }
+    to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+  }
+
+  /* 展开内容区 */
+  .expand-content {
+    display: none;
+    margin-top: 18px;
+    border: 2px solid #bee3f8;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .expand-content.open { display: block; animation: slideDown 0.3s ease; }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 展开内容内部区块 */
+  .expand-section {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: white;
+  }
+  .expand-section:last-child { border-bottom: none; }
+  .expand-section:nth-child(even) { background: #f8fbff; }
+
+  .expand-section-title {
+    font-weight: 700;
+    font-size: 0.95em;
+    color: #2b6cb0;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px dashed #bee3f8;
+  }
+
+  /* 原文引用块 */
+  .original-quote {
+    background: #1a202c;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 10px 0;
+  }
+  .original-quote .quote-label {
+    font-size: 0.75em;
+    color: #68d391;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .original-quote p { color: #e2e8f0; font-size: 0.88em; line-height: 1.7; }
+  .original-quote strong { color: #fbd38d; }
+  .quote-translation {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #4a5568;
+    color: #a0aec0;
+    font-size: 0.83em;
+    line-height: 1.7;
+  }
+
+  /* 公式块 */
+  .formula-box {
+    background: #2d3748;
+    color: #90cdf4;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    padding: 14px 20px;
+    border-radius: 8px;
+    margin: 10px 0;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  /* 对比框 */
+  .compare-box { border-radius: 10px; padding: 14px 16px; }
+  .compare-box-title { font-weight: 700; font-size: 0.88em; margin-bottom: 8px; }
+  .compare-bad { background: #fff5f5; border: 1px solid #fc8181; }
+  .compare-bad .compare-box-title { color: #c53030; }
+  .compare-bad p { font-size: 0.84em; color: #742a2a; }
+  .compare-good { background: #f0fff4; border: 1px solid #68d391; }
+  .compare-good .compare-box-title { color: #276749; }
+  .compare-good p { font-size: 0.84em; color: #22543d; }
+
+  /* 迷你类比 */
+  .mini-analogy {
+    background: #fffbeb;
+    border-left: 3px solid #f6ad55;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 0.85em;
+    color: #744210;
+    margin-top: 12px;
+    line-height: 1.65;
+  }
+</style>
+</head>
+<body>
+
+<!-- 固定悬浮收起按钮（随时可见） -->
+<button class="float-close-btn" id="floatCloseBtn" onclick="closeCurrentExpand()">
+  <span class="icon">✕</span>
+  <span class="label">收起</span>
+</button>
+
+<div class="hero">
+  <div style="font-size:0.85em; opacity:0.6; margin-bottom:8px;">📄 MIT · arXiv 2023 · 机器学习</div>
+  <h1>TRAK 论文读懂指南</h1>
+  <div class="subtitle">循序渐进 · 零基础友好</div>
+  <div>
+    <span class="tag">🤖 数据归因</span>
+    <span class="tag">📊 深度学习</span>
+    <span class="tag">⚡ 计算高效</span>
+    <span class="tag">🔍 模型可解释性</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 导航 -->
+  <div class="nav-grid">
+    <div class="nav-card active" onclick="showSection('overview')">
+      <div class="icon">🗺️</div>
+      <div class="label">论文概览</div>
+      <div class="step">第一步：先看地图</div>
+    </div>
+    <div class="nav-card" onclick="showSection('problem')">
+      <div class="icon">❓</div>
+      <div class="label">解决什么问题</div>
+      <div class="step">第二步：明确目标</div>
+    </div>
+    <div class="nav-card" onclick="showSection('method')">
+      <div class="icon">🔧</div>
+      <div class="label">方法是什么</div>
+      <div class="step">第三步：理解方法</div>
+    </div>
+    <div class="nav-card" onclick="showSection('results')">
+      <div class="icon">📈</div>
+      <div class="label">效果怎么样</div>
+      <div class="step">第四步：看结果</div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 第一步：概览 ==================== -->
+  <div id="overview" class="section active">
+
+    <div class="big-question">
+      <div class="q-mark">🤔</div>
+      <h2>读这篇文章之前，先问自己一个问题</h2>
+      <p>你训练了一个AI模型，它做出了某个预测——你能知道<strong>训练数据中哪些例子</strong>对这个预测贡献最大吗？</p>
+      <p style="margin-top:10px; font-size:0.9em; opacity:0.8;">这就是本文要解决的核心问题，叫做 <strong>"数据归因"</strong></p>
+    </div>
+
+    <div class="card">
+      <h2>🗺️ 文章整体地图</h2>
+      <p style="color:#718096; margin-bottom:20px; font-size:0.9em;">先看清楚文章有哪些部分，心里有底才不会迷失</p>
+      
+      <div class="structure">
+        <div class="structure-item">
+          <div class="sec-title"><span class="sec-tag">摘要</span> Abstract — 论文的"广告语"</div>
+          <div class="sec-desc">用3-4句话说清楚：做了什么、有什么贡献、效果如何。<strong>读论文必先读摘要！</strong></div>
+        </div>
+        <div class="structure-item">
+          <div class="sec-title"><span class="sec-tag">§1</span> Introduction — 引言，"背景故事"</div>
+          <div class="sec-desc">为什么要研究这个问题？现有方法有什么不足？本文的贡献是什么？</div>
+        </div>
+        <div class="structure-item">
+          <div class="sec-title"><span class="sec-tag">§2</span> Motivation & Setup — "定义游戏规则"</div>
+          <div class="sec-desc">如何衡量一个方法的好坏？提出了评价指标 LDS (Linear Datamodeling Score)</div>
+        </div>
+        <div class="structure-item">
+          <div class="sec-title"><span class="sec-tag">§3</span> TRAK Method — "主角登场"</div>
+          <div class="sec-desc">详细介绍本文提出的 TRAK 方法，分5个步骤实现</div>
+        </div>
+        <div class="structure-item">
+          <div class="sec-title"><span class="sec-tag">§4</span> Evaluation — "考试成绩"</div>
+          <div class="sec-desc">在 CIFAR、ImageNet、BERT 等数据集上与其他方法对比</div>
+        </div>
+        <div class="structure-item">
+          <div class="sec-title"><span class="sec-tag">§5</span> Applications — "实际用途"</div>
+          <div class="sec-desc">在 CLIP、语言模型事实追踪 等真实场景中的应用</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⚡ 30秒看懂核心贡献</h2>
+      <div class="highlight-grid">
+        <div class="highlight-card hc-blue">
+          <div class="big-num">100x</div>
+          <div class="desc">比同精度方法<strong>快100倍</strong>以上</div>
+        </div>
+        <div class="highlight-card hc-green">
+          <div class="big-num">5个</div>
+          <div class="desc">只需<strong>几个</strong>训练模型，其他方法需要数千个</div>
+        </div>
+        <div class="highlight-card hc-purple">
+          <div class="big-num">4类</div>
+          <div class="desc">适用于<strong>图像/文本/多模态</strong>等多种任务</div>
+        </div>
+        <div class="highlight-card hc-orange">
+          <div class="big-num">开源</div>
+          <div class="desc">提供了<strong>易用的代码库</strong>供他人使用</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 第二步：问题 ==================== -->
+  <div id="problem" class="section">
+    <div class="card">
+      <h2>❓ 用生活例子理解"数据归因"</h2>
+
+      <div class="analogy">
+        <div class="title">🍎 类比：老师批改作文</div>
+        <p>想象你是一个AI老师，批改了10000篇作文后学会了"什么是好作文"。</p>
+        <p style="margin-top:8px;">现在有一篇新作文，你给了它高分。</p>
+        <p style="margin-top:8px;"><strong>数据归因要解决的问题就是：</strong>你给高分，到底是因为你读过哪些好作文？哪些训练作文对你的这个判断影响最大？</p>
+      </div>
+
+      <div class="analogy" style="background:#f0fff4; border-color: #68d391;">
+        <div class="title" style="color:#276749;">🎬 更贴切的类比：电影推荐算法</div>
+        <p>Netflix 推荐你看《权力的游戏》。数据归因能告诉你：<br>
+        这个推荐是因为你看过《冰与火之歌》原著？还是因为你喜欢《指环王》？还是因为你评了《黑暗荣耀》高分？</p>
+        <p style="margin-top:8px;"><strong>找到"最负责任的"训练数据，就是数据归因的目标。</strong></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⚖️ 现有方法的两难困境</h2>
+      <p style="color:#718096; margin-bottom:16px; font-size:0.9em;">在本文之前，所有方法都面临一个无解的矛盾：</p>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin:16px 0;">
+        <div style="background:#fff5f5; border-radius:12px; padding:20px; border:2px solid #fc8181;">
+          <div style="font-size:1.5em; margin-bottom:8px;">🐢</div>
+          <div style="font-weight:700; color:#c53030; margin-bottom:8px;">精确但太慢</div>
+          <p style="font-size:0.85em; color:#742a2a;">Datamodels 方法效果很好，但需要训练 <strong>数万个</strong> 模型，一个任务要跑几天</p>
+        </div>
+        <div style="background:#fffaf0; border-radius:12px; padding:20px; border:2px solid #f6ad55;">
+          <div style="font-size:1.5em; margin-bottom:8px;">⚡</div>
+          <div style="font-weight:700; color:#c05621; margin-bottom:8px;">快速但不准</div>
+          <p style="font-size:0.85em; color:#7b341e;">影响函数 (Influence Functions) 很快，但在深度神经网络上效果很差</p>
+        </div>
+      </div>
+
+      <div style="background:#f0fff4; border-radius:12px; padding:20px; border:2px solid #68d391; text-align:center; margin-top:16px;">
+        <div style="font-size:1.5em; margin-bottom:8px;">🏆</div>
+        <div style="font-weight:700; color:#276749; margin-bottom:8px;">TRAK：鱼和熊掌兼得</div>
+        <p style="font-size:0.85em; color:#22543d;">只用 <strong>几个到几十个</strong> 模型，就能达到数万模型的效果！速度快 100x，精度不降</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📏 怎么评价一个方法好不好？</h2>
+      <p style="color:#718096; margin-bottom:16px; font-size:0.9em;">论文提出了一个新的评分标准：Linear Datamodeling Score (LDS)</p>
+
+      <div class="analogy">
+        <div class="title">📐 理解 LDS 的核心思想</div>
+        <p><strong>核心思维：预测力</strong></p>
+        <p style="margin-top:8px;">如果你的归因方法是对的，那么它应该能<strong>预测</strong>：如果我把某些训练数据删掉，模型的表现会怎么变化？</p>
+        <p style="margin-top:8px;">就好比：你说训练数据X对预测结果影响最大。那我们真的把X删掉重新训练，模型表现确实变差了——这说明你的归因是对的。</p>
+        <p style="margin-top:8px; font-weight:600; color:#c05621;">LDS 分数越高 = 方法的"预测力"越强 = 归因越准确</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 第三步：方法 ==================== -->
+  <div id="method" class="section">
+    <div class="card">
+      <h2>🔧 TRAK 方法的5个步骤</h2>
+      <p style="color:#718096; margin-bottom:20px; font-size:0.9em;">不需要懂数学公式，先理解每一步在做什么</p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="step-num">1</div>
+          <div class="step-icon">📐</div>
+          <div class="step-name">线性化</div>
+          <div class="step-desc">把复杂神经网络近似为简单线性模型</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-num">2</div>
+          <div class="step-icon">🗜️</div>
+          <div class="step-name">降维</div>
+          <div class="step-desc">用随机投影把百万维度压缩到可处理的大小</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-num">3</div>
+          <div class="step-icon">🎯</div>
+          <div class="step-name">估计影响</div>
+          <div class="step-desc">计算每个训练样本的影响分数</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-num">4</div>
+          <div class="step-icon">🎰</div>
+          <div class="step-name">集成</div>
+          <div class="step-desc">平均多个模型的结果，消除随机性</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="step-num">5</div>
+          <div class="step-icon">✂️</div>
+          <div class="step-name">稀疏化</div>
+          <div class="step-desc">去除噪声，保留最重要的分数</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧩 每个步骤的直觉理解</h2>
+
+      <h3>步骤1：线性化（为什么要这么做？）</h3>
+      <div class="analogy">
+        <div class="title">💡 类比：用切线近似曲线</div>
+        <p>神经网络非常复杂（像一条弯曲的曲线）。在某个局部，我们可以用一条直线来近似它（切线）。</p>
+        <p style="margin-top:8px;">这个近似让原来"复杂模型的数据归因问题"变成了"简单逻辑回归的数据归因问题"——后者是有成熟解法的！</p>
+        </div>
+
+      <button class="expand-btn" onclick="toggleExpand('linearization-detail', this)">
+        📖 详细讲解 ▼
+      </button>
+
+      <div id="linearization-detail" class="expand-content">
+
+        <div class="expand-section">
+          <div class="expand-section-title">① 原文是怎么说的？</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文 Section 3.2</div>
+            <p><em>"The main roadblock to applying Definition 3.1 in our setting is that we are studying a <strong>non-linear model</strong>—that is, our model output function may not be a linear function of θ. We address this issue by approximating f(z; θ) with its <strong>Taylor expansion</strong> centered around the final model parameters θ*."</em></p>
+            <div class="quote-translation">📝 译文：在我们的场景中，应用 Definition 3.1 的最大障碍是——我们研究的是<strong>非线性模型</strong>，模型输出函数不是 θ 的线性函数。我们用以 θ* 为中心的<strong>泰勒展开</strong>来近似 f(z; θ)，以此解决这个问题。</div>
+          </div>
+          <div class="original-quote" style="margin-top:12px;">
+            <div class="quote-label">📄 原文公式（Section 3.2, Step 1）</div>
+            <div class="formula-box">f̂(z; θ) := f(z; θ*) + ∇<sub>θ</sub>f(z; θ*)<sup>T</sup>(θ − θ*)</div>
+            <div class="quote-translation">
+              📝 公式拆解：<br>
+              &nbsp;&nbsp;• <strong>f(z; θ*)</strong>：模型在当前最优参数 θ* 下的输出值（一个已知的数）<br>
+              &nbsp;&nbsp;• <strong>∇<sub>θ</sub>f(z; θ*)</strong>：模型输出对参数的梯度（即"斜率"，也已知）<br>
+              &nbsp;&nbsp;• <strong>(θ − θ*)</strong>：参数偏离 θ* 的距离<br>
+              &nbsp;&nbsp;→ 整体含义：用"当前值 + 斜率 × 偏移量"来预测新位置的函数值，这就是切线近似
+            </div>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">② 什么是"线性"和"非线性"？</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:12px 0;">
+            <div class="compare-box compare-bad">
+              <div class="compare-box-title">📈 非线性（神经网络）</div>
+              <p>输入变化一点，输出以复杂、不可预测的方式变化。就像山路——弯弯绕绕，无法用一条直线描述。</p>
+              <p style="margin-top:8px; font-size:0.82em; color:#9b2c2c;">❌ 没有通用的归因公式</p>
+            </div>
+            <div class="compare-box compare-good">
+              <div class="compare-box-title">📏 线性（逻辑回归）</div>
+              <p>输入变化多少，输出就按比例变化。就像高速公路——笔直，完全可预测。</p>
+              <p style="margin-top:8px; font-size:0.82em; color:#276749;">✅ 有成熟的归因公式（Newton步近似）</p>
+            </div>
+          </div>
+          <div class="mini-analogy">
+            <strong>🌍 生活类比：地图投影</strong><br>
+            地球是球形（非线性曲面），但一个城市的地图是平面（线性）——在局部范围内，用平面近似球面误差很小。神经网络的线性化也是同样的道理：<strong>在 θ* 附近的局部范围，用直线近似曲线</strong>。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">③ 线性化之后，视角发生了什么变化？</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文关键句</div>
+            <p><em>"Rather than viewing f(z; θ) as a <strong>non-linear model acting on inputs x</strong>, we can view it as a <strong>linear model acting on inputs ∇<sub>θ</sub>f(z; θ*)</strong>."</em></p>
+            <div class="quote-translation">📝 译文：与其把 f(z; θ) 看作"以原始数据 x 为输入的非线性模型"，不如把它看作"以<strong>梯度向量</strong> ∇f 为输入的线性模型"。</div>
+          </div>
+          <div style="background:#f0fff4; border-radius:10px; padding:16px; margin-top:12px; border:1px solid #9ae6b4;">
+            <div style="font-weight:700; color:#276749; margin-bottom:10px;">🔄 视角转换对照表</div>
+            <table style="width:100%; font-size:0.85em; border-collapse:collapse;">
+              <tr style="background:#c6f6d5;">
+                <th style="padding:8px 12px; text-align:left; border-radius:6px 0 0 0;">　</th>
+                <th style="padding:8px 12px; text-align:left;">线性化之前</th>
+                <th style="padding:8px 12px; text-align:left; border-radius:0 6px 0 0;">线性化之后</th>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:8px 12px; font-weight:600;">模型类型</td>
+                <td style="padding:8px 12px;">非线性神经网络</td>
+                <td style="padding:8px 12px; color:#276749; font-weight:600;">线性逻辑回归 ✅</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:8px 12px; font-weight:600;">"输入"是什么</td>
+                <td style="padding:8px 12px;">原始数据 x（图片/文字像素）</td>
+                <td style="padding:8px 12px; color:#276749; font-weight:600;">梯度向量 ∇f（每个样本的梯度）✅</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; font-weight:600;">可用归因工具</td>
+                <td style="padding:8px 12px; color:#c53030;">❌ 无成熟方法</td>
+                <td style="padding:8px 12px; color:#276749; font-weight:600;">✅ Newton步近似（40年前就有的公式）</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">④ 为什么这个近似是合理的？</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文解释</div>
+            <p><em>"Prior work (around, e.g., the empirical neural tangent kernel) suggests that this approximation can be <strong>relatively accurate, especially for overparameterized neural networks</strong>."</em></p>
+            <div class="quote-translation">📝 译文：已有研究表明，这个近似相当准确，尤其对<strong>过参数化神经网络</strong>（即参数量远超训练数据量的大模型）来说更是如此。</div>
+          </div>
+          <div class="mini-analogy">
+            <strong>💡 直觉解释：</strong>大型神经网络训练到收敛后，参数已经非常稳定，不再大幅变化。在这个"稳定区域"内，曲线非常平缓——用切线近似误差极小，就像平静湖面上，局部水面近似为平面完全没问题。
+          </div>
+          <div class="mini-analogy" style="background:#faf5ff; border-left-color:#9f7aea;">
+            <strong>🔗 与 eNTK 的联系（原文 Note）：</strong><br>
+            原文还特别说明，Step 1 的线性化本质上就是用empirical Neural Tangent Kernel (eNTK)来近似神经网络。eNTK 是近年来理论分析神经网络泛化性的重要工具，TRAK 借用了这个工具来做归因。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑤ 损失函数推导：为什么"输入"变成了梯度向量 gᵢ？</div>
+
+          <!-- 原始损失函数 -->
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:10px;">这是整个线性化最关键的一步推导，搞懂它就能彻底理解 TRAK 的核心逻辑。</p>
+
+          <div style="font-weight:600; color:#2b6cb0; margin:10px 0 6px;">① 原始损失函数是什么？</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文 Equation (7)</div>
+            <div class="formula-box">θ*(S) = argmin Σ log[ 1 + exp(−y<sub>i</sub> · f(z<sub>i</sub>; θ)) ]</div>
+            <div class="quote-translation">
+              📝 每个符号的含义：<br>
+              &nbsp;&nbsp;• <strong>argmin</strong>：找到让后面式子最小的 θ 值（"最优参数"）<br>
+              &nbsp;&nbsp;• <strong>Σ</strong>：对所有训练样本求和（第1个损失 + 第2个 + … + 第n个）<br>
+              &nbsp;&nbsp;• <strong>yᵢ</strong>：第 i 个样本的标签，只有两个值：+1（正类）或 −1（负类）<br>
+              &nbsp;&nbsp;• <strong>f(zᵢ; θ)</strong>：模型对样本 i 的输出（一个实数，正数倾向正类，负数倾向负类）<br>
+              &nbsp;&nbsp;• <strong>yᵢ · f(zᵢ; θ)</strong>：乘积为正 = 预测正确；乘积为负 = 预测错误<br>
+              &nbsp;&nbsp;• <strong>log[1 + exp(−…)]</strong>：logistic loss，乘积越大（预测越准），损失越接近 0
+            </div>
+          </div>
+
+          <div class="mini-analogy" style="margin-top:10px;">
+            <strong>💡 一句话理解：</strong>找一组参数 θ，让模型在所有训练样本上预测尽量准确（损失之和尽量小）。
+          </div>
+
+          <!-- 两个新变量 -->
+          <div style="font-weight:600; color:#2b6cb0; margin:16px 0 6px;">② 定义两个新变量 gᵢ 和 bᵢ</div>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.85em;">
+            <div style="font-family:monospace; line-height:2.2; color:#2d3748;">
+              <span style="color:#718096;">// 变量1：梯度向量（新的"输入特征"）</span><br>
+              <strong>g<sub>i</sub> := ∇<sub>θ</sub>f(z<sub>i</sub>; θ*)</strong>　← 模型输出对参数的偏导，是一个向量<br><br>
+              <span style="color:#718096;">// 变量2：常数偏置项</span><br>
+              <strong>b<sub>i</sub> := f(z<sub>i</sub>; θ*) − ∇<sub>θ</sub>f(z<sub>i</sub>; θ*)ᵀ θ*</strong>　← 所有项都是已知常数
+            </div>
+          </div>
+          <div class="mini-analogy" style="margin-top:8px;">
+            <strong>💡 bᵢ 为什么是常数？</strong>因为 bᵢ 里的每一项——f(zᵢ; θ*)、∇θf(zᵢ; θ*)、θ*——都是模型训练完毕后就固定下来的已知值，和"待求的 θ"无关。所以 bᵢ 是每个样本各自独立的常数偏置，不随 θ 变化。
+          </div>
+
+          <!-- 代入化简 -->
+          <div style="font-weight:600; color:#2b6cb0; margin:16px 0 6px;">③ 代入化简：展开括号 → 合并 → 得到 θᵀgᵢ + bᵢ</div>
+          <div style="background:#1a202c; border-radius:10px; padding:16px; font-size:0.84em; font-family:monospace; line-height:2; color:#e2e8f0;">
+            <span style="color:#68d391;">// 从泰勒展开公式出发</span><br>
+            f̂(zᵢ; θ) = f(zᵢ; θ*) + ∇<sub>θ</sub>f(zᵢ; θ*)ᵀ <strong style="color:#fbd38d;">(θ − θ*)</strong><br><br>
+            <span style="color:#68d391;">// 展开括号</span><br>
+            　　　　= f(zᵢ; θ*) + ∇<sub>θ</sub>f(zᵢ; θ*)ᵀθ <strong style="color:#fbd38d;">−</strong> ∇<sub>θ</sub>f(zᵢ; θ*)ᵀθ*<br><br>
+            <span style="color:#68d391;">// 用 gᵢ 替换梯度符号</span><br>
+            　　　　= f(zᵢ; θ*) + g<sub>i</sub>ᵀθ − g<sub>i</sub>ᵀθ*<br><br>
+            <span style="color:#68d391;">// 把不含 θ 的两项合并为 bᵢ</span><br>
+            　　　　= <strong style="color:#90cdf4;">f(zᵢ; θ*) − g<sub>i</sub>ᵀθ*</strong> + g<sub>i</sub>ᵀθ<br>
+            　　　　　　<span style="color:#90cdf4;">↑ 这两项合并就是 bᵢ</span><br><br>
+            　　　　= b<sub>i</sub> + g<sub>i</sub>ᵀθ<br><br>
+            <span style="color:#68d391;">// 交换内积顺序（结果相同）</span><br>
+            　　　　= <strong style="color:#68d391;">θᵀg<sub>i</sub> + b<sub>i</sub></strong>　✅ 化简完成
+          </div>
+
+          <!-- 代入损失函数 -->
+          <div style="font-weight:600; color:#2b6cb0; margin:16px 0 6px;">④ 把 θᵀgᵢ + bᵢ 代入损失函数</div>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.85em;">
+            <div style="color:#718096; margin-bottom:8px;">将 f(zᵢ; θ) 替换为 θᵀgᵢ + bᵢ，一步替换，损失函数变成：</div>
+            <div class="formula-box" style="margin:0;">Σ log[ 1 + exp(−y<sub>i</sub> · (<strong>θᵀg<sub>i</sub> + b<sub>i</sub></strong>)) ]</div>
+          </div>
+
+          <!-- 与逻辑回归对比 -->
+          <div style="font-weight:600; color:#2b6cb0; margin:16px 0 6px;">⑤ 与标准逻辑回归对比——关键的一步</div>
+          <div style="background:#f0fff4; border-radius:10px; padding:14px; border:1px solid #9ae6b4;">
+            <table style="width:100%; font-size:0.85em; border-collapse:collapse;">
+              <tr style="background:#c6f6d5;">
+                <th style="padding:8px 12px; text-align:left;">　</th>
+                <th style="padding:8px 12px; text-align:left;">损失函数</th>
+                <th style="padding:8px 12px; text-align:left;">"输入特征"</th>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:8px 12px; font-weight:600;">标准逻辑回归</td>
+                <td style="padding:8px 12px; font-family:monospace; font-size:0.9em;">Σ log[1+exp(−yᵢ·(θᵀ<strong style="color:#c53030;">xᵢ</strong>+bᵢ))]</td>
+                <td style="padding:8px 12px; color:#c53030; font-weight:600;">xᵢ（原始数据）</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; font-weight:600;">线性化后的神经网络</td>
+                <td style="padding:8px 12px; font-family:monospace; font-size:0.9em;">Σ log[1+exp(−yᵢ·(θᵀ<strong style="color:#276749;">gᵢ</strong>+bᵢ))]</td>
+                <td style="padding:8px 12px; color:#276749; font-weight:600;">gᵢ（梯度向量）</td>
+              </tr>
+            </table>
+            <div style="margin-top:10px; font-size:0.85em; color:#276749; font-weight:600;">
+              ✅ 两个公式形式完全相同，唯一区别：xᵢ 换成了 gᵢ。<br>
+              → 原来无法处理的神经网络归因问题，现在变成了有 40 年成熟解法的逻辑回归归因问题！
+            </div>
+          </div>
+
+          <!-- 完整推导链 -->
+          <div style="font-weight:600; color:#2b6cb0; margin:16px 0 6px;">⑥ 完整推导链总结</div>
+          <div style="background:#1a202c; border-radius:10px; padding:16px; font-size:0.84em; color:#e2e8f0; line-height:2;">
+            <span style="color:#68d391;">原始问题</span><br>
+            神经网络损失：Σ log[1 + exp(−yᵢ · <strong style="color:#fbd38d;">f(zᵢ; θ)</strong>)]<br>
+            <span style="color:#a0aec0; padding-left:16px;">↓ 泰勒展开：f(zᵢ; θ) ≈ f(zᵢ; θ*) + ∇<sub>θ</sub>f(zᵢ; θ*)ᵀ(θ − θ*)</span><br>
+            <span style="color:#a0aec0; padding-left:16px;">↓ 定义 gᵢ = ∇<sub>θ</sub>f(zᵢ; θ*)，bᵢ = f(zᵢ; θ*) − gᵢᵀθ*</span><br>
+            <span style="color:#a0aec0; padding-left:16px;">↓ 代入化简：f(zᵢ; θ) ≈ <strong style="color:#90cdf4;">θᵀgᵢ + bᵢ</strong></span><br>
+            <span style="color:#68d391;">得到等价的逻辑回归</span><br>
+            Σ log[1 + exp(−yᵢ · <strong style="color:#90cdf4;">(θᵀgᵢ + bᵢ)</strong>)]<br>
+            <span style="color:#a0aec0; padding-left:16px;">↓ 套用 Newton 步近似公式（Definition 3.1）</span><br>
+            <span style="color:#68d391;">输出归因分数</span><br>
+            τ(z)ᵢ = g(z)ᵀ · (ΦᵀΦ)<sup>-1</sup> · gᵢ · (1 − p*ᵢ)
+          </div>
+
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑥ 线性化带来的新问题（引出 Step 2）</div>
+          <div style="background:#fff5f5; border-radius:10px; padding:16px; border:1px solid #fc8181;">
+            <p style="font-weight:600; color:#c53030; margin-bottom:8px;">⚠️ 线性化虽然解决了"非线性"问题，但带来了新麻烦：</p>
+            <p style="font-size:0.88em;">线性化后，新的"输入"是<strong>梯度向量 ∇f</strong>。梯度的维度 = 模型参数量。</p>
+            <p style="font-size:0.88em; margin-top:6px;">举个例子：BERT-base 有 1.1 亿个参数 → 每个样本的梯度向量有 <strong>1.1亿维</strong>！</p>
+            <p style="font-size:0.88em; margin-top:6px; color:#c53030;">→ 直接处理这么高维度的向量，计算量爆炸，根本无法运行。</p>
+            <p style="font-size:0.88em; margin-top:8px; color:#276749; font-weight:600;">✅ 这就是为什么需要 Step 2：用随机投影把维度压缩到可处理的大小（比如 4000 维）。</p>
+          </div>
+        </div>
+
+      </div>
+
+      <h3>步骤2：降维（为什么需要这一步？）</h3>
+      <div class="analogy">
+        <div class="title">💡 类比：压缩文件</div>
+        <p>现代神经网络有数百万个参数，意味着梯度向量也有数百万维。直接处理太慢。</p>
+        <p style="margin-top:8px;">随机投影（Johnson-Lindenstrauss 引理）保证：把高维向量压缩到低维后，向量之间的<strong>相对关系</strong>（内积）基本不变——就像压缩图片后仍然认得出来。</p>
+        </div>
+
+      <button class="expand-btn" onclick="toggleExpand('dimreduce-detail', this)">
+        📖 详细讲解 ▼
+      </button>
+
+      <div id="dimreduce-detail" class="expand-content">
+
+        <div class="expand-section">
+          <div class="expand-section-title">① 问题有多严重？数字说话</div>
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:12px;">线性化之后，每个训练样本都有一个梯度向量 gᵢ，维度 = 模型参数量 p。当 p 很大时：</p>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.84em; font-family:monospace; line-height:2.2; color:#2d3748;">
+            ResNet-18（ImageNet）：p ≈ 1100万　→ gᵢ 是 <strong>1100万维</strong>向量<br>
+            BERT-base（QNLI）　：p ≈ 1.1亿　 → gᵢ 是 <strong>1.1亿维</strong>向量<br>
+            GPT-3　　　　　　　：p ≈ 1750亿　→ gᵢ 是 <strong>1750亿维</strong>向量
+          </div>
+          <div style="background:#fff5f5; border-radius:10px; padding:14px; margin-top:10px; border:1px solid #fc8181; font-size:0.85em;">
+            <p style="font-weight:700; color:#c53030; margin-bottom:6px;">⚠️ 实际计算有多难？以 BERT + QNLI 为例：</p>
+            <p style="color:#742a2a; line-height:1.9;">
+              训练集 n = 50000 个样本，每个梯度向量 1.1亿维<br>
+              → 梯度矩阵 Φ 大小 = 50000 × 1.1亿 = <strong>5.5万亿个数字</strong>，约 <strong>44 TB</strong><br>
+              → 归因公式需要算 (ΦᵀΦ)⁻¹，这是 1.1亿 × 1.1亿 的矩阵求逆<br>
+              → 计算量 ≈ O(p³) = O((1.1亿)³) ← <strong>完全不可能完成 ❌</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">② 随机投影：做法极其简单</div>
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:10px;">核心操作：生成一个随机矩阵 P，把每个高维梯度向量乘以它，直接压缩到低维。</p>
+          <div style="background:#1a202c; border-radius:10px; padding:16px; font-size:0.84em; font-family:monospace; line-height:2; color:#e2e8f0;">
+            <span style="color:#68d391;">// P 是随机矩阵，大小 p × k，每个元素从 N(0,1) 随机采样</span><br>
+            P ∈ ℝ<sup>p×k</sup>，　p = 原始维度（1.1亿），　k = 目标维度（4000）<br><br>
+            <span style="color:#68d391;">// 对每个训练样本，做一次矩阵乘法</span><br>
+            φᵢ = P<sup>T</sup> gᵢ　　<span style="color:#a0aec0;">← gᵢ 从 p 维压缩为 k 维</span><br><br>
+            <span style="color:#68d391;">// 压缩效果（BERT 例子）</span><br>
+            p = 1.1亿　→　k = 4000　　压缩比 = <strong style="color:#90cdf4;">27500倍</strong><br>
+            Φ 大小：44 TB　→　约 <strong style="color:#90cdf4;">1.6 GB</strong>　✅ 可以处理了
+          </div>
+          <div class="mini-analogy" style="margin-top:10px;">
+            <strong>💡 随机矩阵不需要学习：</strong>P 的每个元素直接从正态分布随机采样，没有任何训练过程。这是随机投影神奇的地方——不需要"聪明的"压缩方式，纯随机就足够好。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">③ 为什么随机就够了？Johnson-Lindenstrauss 引理</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 Johnson-Lindenstrauss 引理（1984）核心结论</div>
+            <p>对于 n 个高维向量，存在一个从 p 维到 k 维的随机线性映射，使得任意两个向量之间的内积以高概率被近似保留。所需的 k 只需满足：</p>
+            <div class="formula-box" style="margin:10px 0;">k ≥ C × log(n) / ε²</div>
+            <div class="quote-translation">
+              📝 公式含义：<br>
+              &nbsp;&nbsp;• <strong>k</strong>：压缩后的目标维度<br>
+              &nbsp;&nbsp;• <strong>n</strong>：样本数量<br>
+              &nbsp;&nbsp;• <strong>ε</strong>：允许的误差范围（比如 0.1 = 允许 10% 误差）<br>
+              &nbsp;&nbsp;• <strong>C</strong>：一个常数<br>
+              &nbsp;&nbsp;• 🔑 <strong>关键：k 只和 log(n) 有关，和原始维度 p 完全无关！</strong>
+            </div>
+          </div>
+          <div style="background:#f0fff4; border-radius:10px; padding:14px; margin-top:10px; border:1px solid #9ae6b4; font-size:0.85em;">
+            <p style="font-weight:700; color:#276749; margin-bottom:8px;">✅ 实际意义：</p>
+            <p style="color:#22543d; line-height:1.9;">
+              n = 50000 样本，ε = 0.1（允许10%误差）<br>
+              → k ≈ 几千维就够了<br>
+              → <strong>不管 p 是 100万还是 1750亿，k 都是这个数！</strong><br>
+              → 所以随机投影的压缩维度 k 和模型大小无关，只和数据集大小有关
+            </p>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">④ 为什么"保留内积"就够了？</div>
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:10px;">归因公式的核心是：</p>
+          <div class="formula-box">τ(z)ᵢ ∝ g(z)ᵀ · (ΦᵀΦ)<sup>-1</sup> · gᵢ</div>
+          <p style="font-size:0.88em; color:#4a5568; margin:10px 0;">这个公式里，梯度只以<strong>内积</strong>的形式出现（gᵢ · gⱼ）。JL 引理保证：</p>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.84em; font-family:monospace; line-height:2; color:#2d3748;">
+            压缩前：gᵢ · gⱼ = x<br>
+            压缩后：φᵢ · φⱼ ≈ x　（误差在 ε 范围内）
+          </div>
+          <div class="mini-analogy" style="margin-top:10px;">
+            <strong>🌍 直觉类比：</strong>把1亿个城市在三维地球上的相对距离，投影到二维地图上。两个城市在地球上近，在地图上也近；在地球上远，地图上也远——<strong>相对关系被保留了</strong>。归因只需要相对关系，不需要绝对坐标，所以压缩后结果基本不变。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑤ 数字例子：感受内积被保留</div>
+          <p style="font-size:0.85em; color:#718096; margin-bottom:10px;">设定：原始 4 维，压缩到 2 维，三个样本：橙子A、橙子B（相似）、苹果C（不同）</p>
+          <div style="font-weight:600; color:#2b6cb0; margin-bottom:6px; font-size:0.88em;">压缩前的梯度向量和内积：</div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:2; color:#2d3748; margin-bottom:10px;">
+            g₁（橙子A）= [1.0, 0.0, 1.0, 0.0]<br>
+            g₂（橙子B）= [0.9, 0.1, 0.9, 0.1]<br>
+            g₃（苹果C）= [0.0, 1.0, 0.0, 1.0]<br><br>
+            g₁·g₂ = 1×0.9 + 0×0.1 + 1×0.9 + 0×0.1 = <strong style="color:#276749;">1.80</strong>　← 很相似<br>
+            g₁·g₃ = 1×0  + 0×1   + 1×0   + 0×1   = <strong style="color:#c53030;">0.00</strong>　← 完全不同
+          </div>
+          <div style="font-weight:600; color:#2b6cb0; margin-bottom:6px; font-size:0.88em;">随机矩阵 P（4×2）：</div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:2; color:#2d3748; margin-bottom:10px;">
+            P = [[ 0.6,  0.3],<br>
+            　　 [-0.4,  0.7],<br>
+            　　 [ 0.5, -0.2],<br>
+            　　 [ 0.1,  0.8]]
+          </div>
+          <div style="font-weight:600; color:#2b6cb0; margin-bottom:6px; font-size:0.88em;">压缩后（φᵢ = Pᵀgᵢ）和内积：</div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:2; color:#2d3748;">
+            φ₁（橙子A）= [1.10,  0.10]<br>
+            φ₂（橙子B）= [1.00,  0.14]<br>
+            φ₃（苹果C）= [-0.30, 1.50]<br><br>
+            φ₁·φ₂ = 1.1×1.0 + 0.1×0.14 = <strong style="color:#276749;">1.114</strong>　✅ 仍然很大（原来 1.80）<br>
+            φ₁·φ₃ = 1.1×(−0.3) + 0.1×1.5 = <strong style="color:#c53030;">−0.18</strong>　✅ 仍然接近零（原来 0.00）
+          </div>
+          <div style="background:#f0fff4; border-radius:8px; padding:10px; margin-top:10px; border-left:3px solid #48bb78; font-size:0.84em; color:#276749;">
+            ✅ <strong>结论：</strong>橙子A和橙子B压缩后仍然相似，和苹果C仍然不相关。归因分数的排名不变。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑥ 论文里的实现细节</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div style="background:#faf5ff; border-radius:10px; padding:14px; border:1px solid #d6bcfa; font-size:0.84em;">
+              <div style="font-weight:700; color:#553c9a; margin-bottom:6px;">🎲 随机矩阵不存储</div>
+              <p style="color:#44337a; line-height:1.7;">P 的大小 = p × k = 1.1亿 × 4000 ≈ 440 GB，根本存不下。解决方案：用伪随机数生成器<strong>实时生成</strong>每一行，用完即丢，固定随机种子保证可复现。</p>
+            </div>
+            <div style="background:#ebf8ff; border-radius:10px; padding:14px; border:1px solid #90cdf4; font-size:0.84em;">
+              <div style="font-weight:700; color:#2b6cb0; margin-bottom:6px;">⚡ GPU 加速</div>
+              <p style="color:#2c5282; line-height:1.7;">论文实现了专门的 CUDA kernel，利用 GPU 的 Tensor Core 加速矩阵运算，比朴素实现快 <strong>200倍以上</strong>。</p>
+            </div>
+          </div>
+          <div style="font-weight:600; color:#2b6cb0; margin:10px 0 6px; font-size:0.88em;">不同数据集选用的压缩维度 k：</div>
+          <div style="background:#f0fff4; border-radius:10px; overflow:hidden; border:1px solid #9ae6b4;">
+            <table style="width:100%; font-size:0.84em; border-collapse:collapse;">
+              <tr style="background:#c6f6d5;">
+                <th style="padding:8px 12px; text-align:left;">数据集</th>
+                <th style="padding:8px 12px; text-align:left;">模型</th>
+                <th style="padding:8px 12px; text-align:left;">选用的 k</th>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:8px 12px;">CIFAR-2</td>
+                <td style="padding:8px 12px;">ResNet-9</td>
+                <td style="padding:8px 12px; font-weight:700;">4,000</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4; background:#f0fff4;">
+                <td style="padding:8px 12px;">CIFAR-10</td>
+                <td style="padding:8px 12px;">ResNet-9</td>
+                <td style="padding:8px 12px; font-weight:700;">20,000</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:8px 12px;">QNLI</td>
+                <td style="padding:8px 12px;">BERT-base</td>
+                <td style="padding:8px 12px; font-weight:700;">4,000</td>
+              </tr>
+              <tr style="background:#f0fff4;">
+                <td style="padding:8px 12px;">ImageNet</td>
+                <td style="padding:8px 12px;">ResNet-18</td>
+                <td style="padding:8px 12px; font-weight:700;">15,000</td>
+              </tr>
+            </table>
+          </div>
+          <div class="mini-analogy" style="margin-top:10px;">
+            <strong>⚠️ k 不是越大越好：</strong>论文 Appendix E.1 发现，k 过大反而会降低 LDS 分数。适度压缩有<strong>正则化效果</strong>，帮助泛化；压缩太少反而引入噪声。
+          </div>
+        </div>
+
+      </div>
+
+      <h3>步骤3：估计影响（Newton 步近似）</h3>
+      <div class="analogy">
+        <div class="title">💡 类比：弹簧平衡</div>
+        <p>把每个训练样本想象成一个挂在弹簧上的重物，把弹簧"拉"到了平衡位置 θ*。</p>
+        <p style="margin-top:8px;">删掉样本 i = 拿走重物 i。Newton 步近似不等弹簧真的重新稳定，而是根据"重物有多重"和"弹簧有多硬"，<strong>直接用公式估算新平衡在哪里</strong>。</p>
+        </div>
+
+      <button class="expand-btn" onclick="toggleExpand('newton-detail', this)">
+        📖 详细讲解 ▼
+      </button>
+
+      <div id="newton-detail" class="expand-content">
+
+        <div class="expand-section">
+          <div class="expand-section-title">① 我们要计算什么？</div>
+          <p style="font-size:0.88em; color:#4a5568;">核心问题：<strong>删掉训练样本 i，重新训练，模型对测试样本 z 的预测会变多少？</strong></p>
+          <p style="font-size:0.88em; color:#4a5568; margin-top:8px;">这个变化量就是样本 i 的归因分数——变化越大，说明这个样本越重要。</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:12px;">
+            <div class="compare-box compare-bad">
+              <div class="compare-box-title">🐢 暴力方法</div>
+              <p>对每个样本 i，真的删掉它，重新训练，观察变化。训练集有 n 个样本就要训练 n 次。</p>
+              <p style="margin-top:6px; font-size:0.82em; color:#9b2c2c;">n = 50000 → 训练 50000 次 ❌</p>
+            </div>
+            <div class="compare-box compare-good">
+              <div class="compare-box-title">⚡ Newton 步近似</div>
+              <p>用一步数学运算估算"删掉样本 i 后参数怎么变"，不需要真的重新训练。</p>
+              <p style="margin-top:6px; font-size:0.82em; color:#276749;">只需计算一次梯度 ✅</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">② 最终归因公式长什么样？</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文 Equation (13)</div>
+            <div class="formula-box">τ(z, S) = φ(z)<sup>T</sup> (Φ<sup>T</sup>Φ)<sup>-1</sup> Φ<sup>T</sup> Q</div>
+            <div class="quote-translation">
+              📝 每一项的含义：<br>
+              &nbsp;&nbsp;• <strong>φ(z)</strong>：测试样本 z 的（降维后）梯度向量——"测试样本关心哪些参数方向"<br>
+              &nbsp;&nbsp;• <strong>(Φ<sup>T</sup>Φ)<sup>-1</sup></strong>：模型曲率的逆——"哪些参数方向容易被影响"<br>
+              &nbsp;&nbsp;• <strong>Φ<sup>T</sup></strong>：所有训练样本梯度矩阵的转置<br>
+              &nbsp;&nbsp;• <strong>Q</strong>：对角矩阵，第 i 项 = (1 − p*ᵢ)，即"模型对样本 i 的不确定程度"
+            </div>
+          </div>
+          <div class="mini-analogy">
+            <strong>💡 三项合起来的直觉：</strong>归因分数高 ↔ 训练样本 i 和测试样本 z 在梯度空间里<strong>方向相似</strong>，且模型对样本 i <strong>还不够自信</strong>，且这个方向是模型<strong>容易被推动</strong>的方向。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">③ p*ᵢ 是什么，怎么算出来的？</div>
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:10px;">p*ᵢ 是模型用训练好的参数 θ* 对训练样本 i 预测为<strong>正确类别</strong>的概率。完整计算路径：</p>
+          <div style="background:#f7fafc; border-radius:10px; padding:16px; font-size:0.85em;">
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#4299e1; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">1</div>
+                <div><strong>原始输入 xᵢ</strong>（一张图片的像素）喂进训练好的神经网络</div>
+              </div>
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#4299e1; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">2</div>
+                <div>得到模型输出 <strong>f(xᵢ; θ*)</strong>，一个实数（正数倾向正类，负数倾向负类）</div>
+              </div>
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#4299e1; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">3</div>
+                <div>乘以标签 yᵢ（+1 或 −1），得到 <strong>yᵢ × f(xᵢ; θ*)</strong>（正数=预测正确，负数=预测错误）</div>
+              </div>
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#4299e1; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">4</div>
+                <div>代入 sigmoid 函数：<strong>p*ᵢ = 1 / (1 + exp(−yᵢ × f(xᵢ; θ*)))</strong></div>
+              </div>
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#48bb78; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">5</div>
+                <div>得到 <strong>(1 − p*ᵢ)</strong>，即不确定程度，用于加权归因分数</div>
+              </div>
+            </div>
+          </div>
+          <div class="mini-analogy" style="margin-top:12px;">
+            <strong>💡 直觉：</strong>p*ᵢ 接近 1 = 模型对这个样本已经很自信了，删掉它影响不大；p*ᵢ 接近 0.5 = 模型对它还很不确定，删掉影响更大。所以用 (1 − p*ᵢ) 作为权重，不确定的样本归因分数被放大。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">④ 数字例子：一步步算出归因分数</div>
+          <p style="font-size:0.85em; color:#718096; margin-bottom:12px;">设定：二分类（橙子 vs 苹果），模型只有 2 个参数，每个样本只有 2 个特征（颜色值、形状值）</p>
+
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.84em; margin-bottom:10px;">
+            <div style="font-weight:700; color:#2d3748; margin-bottom:8px;">📋 已知条件</div>
+            <div style="font-family:monospace; line-height:2; color:#2d3748;">
+              θ* = [0.6, 0.4]　　← 训练好的模型参数<br>
+              样本A（橙子）：x_A = [0.9, 0.8]，y_A = +1<br>
+              样本B（苹果）：x_B = [0.2, 0.7]，y_B = −1<br>
+              测试样本z（橙子）：x_z = [0.8, 0.7]
+            </div>
+          </div>
+
+          <div style="font-weight:600; color:#2b6cb0; margin:12px 0 6px;">Step 1：计算每个样本的梯度 gᵢ</div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:1.9;">
+            <span style="color:#718096;">// 这个极简线性模型里，梯度 = 原始特征向量 xᵢ</span><br>
+            g_A = [0.9, 0.8]<br>
+            g_B = [0.2, 0.7]<br>
+            g_z = [0.8, 0.7]　← 测试样本的梯度
+          </div>
+
+          <div style="font-weight:600; color:#2b6cb0; margin:12px 0 6px;">Step 2：计算模型输出 f(xᵢ; θ*)</div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:1.9;">
+            f(x_A) = 0.6×0.9 + 0.4×0.8 = 0.54 + 0.32 = <strong>0.86</strong><br>
+            f(x_B) = 0.6×0.2 + 0.4×0.7 = 0.12 + 0.28 = <strong>0.40</strong>
+          </div>
+
+          <div style="font-weight:600; color:#2b6cb0; margin:12px 0 6px;">Step 3：计算 p*ᵢ = sigmoid(yᵢ × f(xᵢ))</div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:1.9;">
+            <span style="color:#718096;">// 样本A（橙子，y=+1）</span><br>
+            p*_A = 1 / (1 + exp(−1 × 0.86))<br>
+            　　 = 1 / (1 + 0.423) = <strong>0.703</strong>　← 预测较准，不确定度低<br><br>
+            <span style="color:#718096;">// 样本B（苹果，y=−1），但 f=0.4>0 说明模型误判为橙子</span><br>
+            p*_B = 1 / (1 + exp(−(−1) × 0.40))<br>
+            　　 = 1 / (1 + exp(−0.40)) 　<span style="color:#718096;">← 注意：y=−1 所以变成 exp(+0.40)</span><br>
+
+            　　 = 1 / (1 + 1.492) = <strong>0.401</strong>　← 预测不准，不确定度高
+          </div>
+
+          <div style="font-weight:600; color:#2b6cb0; margin:12px 0 6px;">Step 4：计算不确定程度 (1 − p*ᵢ)</div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:1.9;">
+            1 − p*_A = 1 − 0.703 = <strong>0.297</strong><br>
+            1 − p*_B = 1 − 0.401 = <strong>0.599</strong>
+          </div>
+
+          <div style="font-weight:600; color:#2b6cb0; margin:12px 0 6px;">Step 5：计算归因分数（忽略曲率矩阵，假设各方向同等重要）</div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:1.9;">
+            τ(z)_A = g_z · g_A × (1−p*_A)<br>
+            　　　 = (0.8×0.9 + 0.7×0.8) × 0.297<br>
+            　　　 = (0.72 + 0.56) × 0.297<br>
+            　　　 = 1.28 × 0.297 = <strong style="color:#276749;">0.380 ✅ 正分，有帮助</strong><br><br>
+            τ(z)_B = g_z · g_B × (1−p*_B)<br>
+            　　　 = (0.8×0.2 + 0.7×0.7) × 0.599<br>
+            　　　 = (0.16 + 0.49) × 0.599<br>
+            　　　 = 0.65 × 0.599 = <strong style="color:#c05621;">0.389 ⚠️ 本应为负分</strong>
+          </div>
+
+          <div style="background:#fffbeb; border-radius:8px; padding:12px; margin-top:10px; font-size:0.84em; border-left:3px solid #f6ad55; color:#744210;">
+            <strong>⚠️ 为什么样本B（苹果）也算出了正分？</strong><br>
+            因为我们忽略了 (Φ<sup>T</sup>Φ)<sup>-1</sup>（曲率矩阵）。它的作用是修正"方向是否真正有帮助"——样本B的 x₂ 特征（形状值 0.7）和测试样本相近，导致内积为正。真实 TRAK 计算中，曲率矩阵会让苹果样本得到负分。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑤ 归因分数含义总结</div>
+          <div style="background:#f0fff4; border-radius:10px; padding:16px; border:1px solid #9ae6b4;">
+            <table style="width:100%; font-size:0.85em; border-collapse:collapse;">
+              <tr style="background:#c6f6d5;">
+                <th style="padding:8px 12px; text-align:left;">归因分数</th>
+                <th style="padding:8px 12px; text-align:left;">含义</th>
+                <th style="padding:8px 12px; text-align:left;">例子</th>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:8px 12px; color:#276749; font-weight:700;">高正分</td>
+                <td style="padding:8px 12px;">删掉这个样本，预测变差很多</td>
+                <td style="padding:8px 12px;">同类训练图片，模型还没完全学会</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:8px 12px; color:#718096; font-weight:700;">接近零</td>
+                <td style="padding:8px 12px;">删不删都无所谓</td>
+                <td style="padding:8px 12px;">模型对该样本已非常自信，或与测试样本无关</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; color:#c53030; font-weight:700;">负分</td>
+                <td style="padding:8px 12px;">删掉这个样本，预测反而变好</td>
+                <td style="padding:8px 12px;">不同类样本，在"拉着"模型做错误判断</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <h3>步骤4：集成（为什么要多个模型？）</h3>
+      <div class="analogy">
+        <div class="title">💡 类比：多个医生会诊</div>
+        <p>一个医生的判断可能受到随机因素影响（比如那天状态不好）。多个医生独立会诊再综合，结论更可靠。</p>
+        <p style="margin-top:8px;">神经网络训练也有随机性（随机种子、数据顺序、Dropout），同样的训练集训练出来的模型行为会有显著差异。平均多个模型的归因分数能"抹平"这种随机噪声，得到更稳定可靠的结果。</p>
+        </div>
+
+      <button class="expand-btn" onclick="toggleExpand('ensemble-detail', this)">
+        📖 详细讲解 ▼
+      </button>
+
+      <div id="ensemble-detail" class="expand-content">
+
+        <div class="expand-section">
+          <div class="expand-section-title">① 为什么训练随机性是个问题？</div>
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:10px;">神经网络训练有多个随机来源：</p>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.84em; font-family:monospace; line-height:2.1; color:#2d3748; margin-bottom:12px;">
+            参数初始化　← 权重随机初始化<br>
+            数据顺序　　← 每个 epoch 的 batch 顺序随机打乱<br>
+            Dropout　　← 随机丢弃神经元<br>
+            数据增强　　← 随机裁剪/翻转图片
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div style="background:#fff5f5; border-radius:10px; padding:14px; border:1px solid #fc8181; font-size:0.84em;">
+              <div style="font-weight:700; color:#c53030; margin-bottom:6px;">😟 单个模型的问题</div>
+              <p style="color:#742a2a; line-height:1.8;">
+                模型A（种子1）：样本i归因分数 = 0.35<br>
+                模型B（种子2）：样本i归因分数 = 0.12<br>
+                <strong>哪个才是"真实"影响力？两个都不准。</strong>
+              </p>
+            </div>
+            <div style="background:#f0fff4; border-radius:10px; padding:14px; border:1px solid #9ae6b4; font-size:0.84em;">
+              <div style="font-weight:700; color:#276749; margin-bottom:6px;">✅ 集成之后</div>
+              <p style="color:#22543d; line-height:1.8;">
+                平均100个模型：样本i归因分数 ≈ 0.23<br>
+                随机噪声互相抵消，剩下的是稳定的信号。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">② 原文的做法：两个关键修改</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文 Section 3.2 Step 4</div>
+            <p><em>"To 'smooth out' the impact of such seed-based differences, we aggregate the estimator across multiple trained models, with two small modifications: (a) averaging the two parts of the formula separately before multiplying, and (b) training each model on a random subset of S rather than the full training set."</em></p>
+            <div class="quote-translation">📝 译文：为了"抹平"随机种子带来的差异，我们在多个训练好的模型上聚合估计量，并做了两个小修改：(a) 先分别平均公式的两个部分，再相乘；(b) 每个模型在 S 的随机子集上训练，而不是全部数据。</div>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">③ 修改 (a)：先平均各部分，再相乘</div>
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:10px;">归因公式可以拆成两个独立部分：</p>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.84em; font-family:monospace; line-height:2.2; color:#2d3748; margin-bottom:10px;">
+            τₘ(z) = <strong style="color:#3182ce;">[ φₘ(z)ᵀ (ΦₘᵀΦₘ)⁻¹ Φₘᵀ ]</strong>  ×  <strong style="color:#e53e3e;">[ Qₘ ]</strong><br>
+            　　　　<strong style="color:#3182ce;">↑ 特征部分（和测试样本z有关）</strong>　　<strong style="color:#e53e3e;">↑ 概率部分（训练集信息）</strong>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:10px;">
+            <div style="background:#fff5f5; border-radius:10px; padding:14px; border:1px solid #fc8181; font-size:0.84em;">
+              <div style="font-weight:700; color:#c53030; margin-bottom:6px;">❌ 朴素方法</div>
+              <p style="color:#742a2a; line-height:1.8; font-family:monospace;">
+                对每个模型m：<br>
+                　算完整 τₘ(z)<br>
+                最后平均：<br>
+                　(1/M) Σ τₘ(z)
+              </p>
+            </div>
+            <div style="background:#f0fff4; border-radius:10px; padding:14px; border:1px solid #9ae6b4; font-size:0.84em;">
+              <div style="font-weight:700; color:#276749; margin-bottom:6px;">✅ 论文做法</div>
+              <p style="color:#22543d; line-height:1.8; font-family:monospace;">
+                先分别平均两部分：<br>
+                　Q̄ = (1/M) Σ Qₘ<br>
+                　F̄ = (1/M) Σ 特征部分ₘ<br>
+                最后：τ = F̄ × Q̄
+              </p>
+            </div>
+          </div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文 Equation (15)</div>
+            <div class="formula-box">τ<sub>M</sub>(z) = [ (1/M) Σ φ<sub>m</sub>(z)<sup>T</sup>(Φ<sub>m</sub><sup>T</sup>Φ<sub>m</sub>)<sup>-1</sup>Φ<sub>m</sub><sup>T</sup> ] × [ (1/M) Σ Q<sub>m</sub> ]</div>
+            <div class="quote-translation">📝 原文说这样做的原因是<strong>数值稳定性</strong>（numerical stability）：每个模型的完整乘积数值可能相差很大，直接平均容易出现数值误差；先在更平滑的矩阵上取平均，再相乘，结果更稳定。</div>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">④ 修改 (b)：每个模型用随机子集训练</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div style="background:#fff5f5; border-radius:10px; padding:14px; border:1px solid #fc8181; font-size:0.84em;">
+              <div style="font-weight:700; color:#c53030; margin-bottom:6px;">❌ 朴素方法</div>
+              <p style="color:#742a2a; line-height:1.8; font-family:monospace;">
+                模型1：在完整 S 上训练<br>
+                模型2：在完整 S 上训练<br>
+                模型M：在完整 S 上训练<br>
+                （只换随机种子）
+              </p>
+            </div>
+            <div style="background:#f0fff4; border-radius:10px; padding:14px; border:1px solid #9ae6b4; font-size:0.84em;">
+              <div style="font-weight:700; color:#276749; margin-bottom:6px;">✅ 论文做法</div>
+              <p style="color:#22543d; line-height:1.8; font-family:monospace;">
+                模型1：在子集 S₁ ⊂ S 上训练<br>
+                模型2：在子集 S₂ ⊂ S 上训练<br>
+                模型M：在子集 Sₘ ⊂ S 上训练<br>
+                （每个子集随机采样）
+              </p>
+            </div>
+          </div>
+          <div class="mini-analogy">
+            <strong>💡 为什么子集采样更好？处理冗余样本：</strong><br>
+            假设训练集里有 100 张极其相似的图片（同一场景）。朴素方法下，每个模型都见过所有 100 张，归因分数被"稀释"，每张图分数都很低。子集采样让每个模型只见到其中一部分，不同模型覆盖不同的图片，平均后整组图片的影响力被正确体现出来。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑤ 节省计算的两个变体（Appendix E.3）</div>
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:12px;">训练 M 个完全独立的模型成本很高。论文发现两个省钱方案，效果几乎不变：</p>
+
+          <div style="font-weight:600; color:#2b6cb0; font-size:0.88em; margin-bottom:6px;">变体1：同一模型的多个 checkpoint</div>
+          <p style="font-size:0.84em; color:#4a5568; margin-bottom:8px;">不训练 M 个独立模型，而是训练少量模型，每个模型保存多个训练过程中的 checkpoint，用这些 checkpoint 代替独立模型。</p>
+          <div style="background:#f0fff4; border-radius:10px; overflow:hidden; border:1px solid #9ae6b4; margin-bottom:12px;">
+            <table style="width:100%; font-size:0.83em; border-collapse:collapse;">
+              <tr style="background:#c6f6d5;">
+                <th style="padding:7px 12px; text-align:left;">独立模型数</th>
+                <th style="padding:7px 12px; text-align:left;">每模型 checkpoint 数</th>
+                <th style="padding:7px 12px; text-align:left;">LDS（CIFAR-10）</th>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:7px 12px;">5</td><td style="padding:7px 12px;">20</td>
+                <td style="padding:7px 12px; font-weight:700;">0.329</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4; background:#f0fff4;">
+                <td style="padding:7px 12px;">6</td><td style="padding:7px 12px;">~17</td>
+                <td style="padding:7px 12px; font-weight:700;">0.340</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:7px 12px;">10</td><td style="padding:7px 12px;">10</td>
+                <td style="padding:7px 12px; font-weight:700;">0.350</td>
+              </tr>
+              <tr style="background:#f0fff4;">
+                <td style="padding:7px 12px; color:#276749; font-weight:700;">100（独立）</td>
+                <td style="padding:7px 12px;">1</td>
+                <td style="padding:7px 12px; font-weight:700; color:#276749;">0.355 ✅ 基准</td>
+              </tr>
+            </table>
+          </div>
+          <div style="background:#fffbeb; border-radius:8px; padding:10px; font-size:0.83em; color:#744210; border-left:3px solid #f6ad55; margin-bottom:14px;">
+            💡 <strong>5 个模型的效果已经接近 100 个独立模型</strong>，计算成本降低 20 倍。
+          </div>
+
+          <div style="font-weight:600; color:#2b6cb0; font-size:0.88em; margin-bottom:6px;">变体2：不等训练完全收敛</div>
+          <p style="font-size:0.84em; color:#4a5568; margin-bottom:8px;">用早期训练 checkpoint（训练未完成时）来计算梯度，不需要等模型完全收敛。</p>
+          <div style="background:#f0fff4; border-radius:10px; overflow:hidden; border:1px solid #9ae6b4;">
+            <table style="width:100%; font-size:0.83em; border-collapse:collapse;">
+              <tr style="background:#c6f6d5;">
+                <th style="padding:7px 12px; text-align:left;">训练 epoch 数</th>
+                <th style="padding:7px 12px; text-align:left;">LDS（CIFAR-10）</th>
+                <th style="padding:7px 12px; text-align:left;">完整训练的百分比</th>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:7px 12px;">1</td><td style="padding:7px 12px;">0.100</td><td style="padding:7px 12px;">32%</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4; background:#f0fff4;">
+                <td style="padding:7px 12px;">5</td><td style="padding:7px 12px;">0.204</td><td style="padding:7px 12px;">66%</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4;">
+                <td style="padding:7px 12px;">10</td><td style="padding:7px 12px;">0.265</td><td style="padding:7px 12px;">86%</td>
+              </tr>
+              <tr style="border-bottom:1px solid #9ae6b4; background:#f0fff4;">
+                <td style="padding:7px 12px;">15</td><td style="padding:7px 12px;">0.293</td><td style="padding:7px 12px;">95%</td>
+              </tr>
+              <tr style="background:#c6f6d5;">
+                <td style="padding:7px 12px; font-weight:700; color:#276749;">25（完整）</td>
+                <td style="padding:7px 12px; font-weight:700; color:#276749;">0.308 ✅</td>
+                <td style="padding:7px 12px; font-weight:700; color:#276749;">100%</td>
+              </tr>
+            </table>
+          </div>
+          <div style="background:#fffbeb; border-radius:8px; padding:10px; font-size:0.83em; color:#744210; border-left:3px solid #f6ad55; margin-top:8px;">
+            💡 训练 <strong>10 个 epoch</strong> 就能达到完整训练 86% 的效果，大幅节省训练时间。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑥ 完整集成流程总结</div>
+          <div style="background:#1a202c; border-radius:10px; padding:16px; font-size:0.84em; color:#e2e8f0; line-height:2.1; font-family:monospace;">
+            <span style="color:#68d391;">// 准备阶段</span><br>
+            随机划分 M 个训练子集 S₁, S₂, ..., Sₘ<br><br>
+            <span style="color:#68d391;">// 对每个 m = 1 到 M</span><br>
+            ① 在 Sₘ 上训练模型 → θ*(Sₘ)<br>
+            ② 计算所有训练样本的降维梯度矩阵 Φₘ<br>
+            ③ 计算概率矩阵 Qₘ（对角线是 (1−p*ᵢ)）<br>
+            ④ 计算特征部分 φₘ(z)ᵀ(ΦₘᵀΦₘ)⁻¹Φₘᵀ<br><br>
+            <span style="color:#68d391;">// 集成</span><br>
+            Q̄ = (1/M) Σ Qₘ　　　　　　← 平均概率部分<br>
+            F̄ = (1/M) Σ 特征部分ₘ　　← 平均特征部分<br><br>
+            <span style="color:#68d391;">// 最终归因分数</span><br>
+            τ_TRAK(z) = <strong style="color:#90cdf4;">F̄ × Q̄</strong><br><br>
+            <span style="color:#68d391;">// 后处理（Step 5）</span><br>
+            τ_final = S(τ_TRAK; λ̂)　　← 软阈值去噪
+          </div>
+        </div>
+
+      </div>
+
+      <h3>步骤5：稀疏化（软阈值处理）</h3>
+      <div class="analogy">
+        <div class="title">💡 类比：去除背景噪音</div>
+        <p>归因分数天然是稀疏的——每个测试样本只真正依赖训练集里少数几个样本。但计算过程会引入噪声，让大量"无关样本"也有了微小的非零分数。</p>
+        <p style="margin-top:8px;">软阈值处理把绝对值小于阈值 λ 的分数<strong>直接归零</strong>，同时把较大的分数向零方向缩小一点，让结果更干净准确。</p>
+        </div>
+
+      <button class="expand-btn" onclick="toggleExpand('sparse-detail', this)">
+        📖 详细讲解 ▼
+      </button>
+
+      <div id="sparse-detail" class="expand-content">
+
+        <div class="expand-section">
+          <div class="expand-section-title">① 为什么归因分数需要稀疏化？</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文 Section 3.2 Step 5</div>
+            <p><em>"Ilyas et al. find that for neural networks attribution scores are often <strong>sparse</strong>—that is, each test example depends on only a <strong>few examples</strong> from the training set."</em></p>
+            <div class="quote-translation">📝 译文：每个测试样本实际上只依赖训练集里<strong>少数几个</strong>样本，归因分数天然是稀疏的。</div>
+          </div>
+          <p style="font-size:0.88em; color:#4a5568; margin:12px 0 8px;">但实际计算出来的结果并不稀疏：</p>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.84em; font-family:monospace; line-height:2.2; color:#2d3748;">
+            <span style="color:#718096;">// 真实情况（应该稀疏）</span><br>
+            τ_真实 = [0, 0, <strong style="color:#276749;">0.80</strong>, 0, 0, <strong style="color:#276749;">0.30</strong>, 0]<br><br>
+            <span style="color:#718096;">// 计算结果（混入了噪声）</span><br>
+            τ_计算 = [<strong style="color:#c53030;">0.02</strong>, <strong style="color:#c53030;">-0.01</strong>, <strong style="color:#276749;">0.79</strong>, <strong style="color:#c53030;">0.03</strong>, <strong style="color:#c53030;">-0.02</strong>, <strong style="color:#276749;">0.31</strong>, <strong style="color:#c53030;">0.01</strong>]<br>
+            　　　　　<span style="color:#c53030;">↑ 这些是噪声，需要去掉</span>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">② 软阈值公式是什么意思？</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文 Equation (16)</div>
+            <div class="formula-box">S(τ; λ) = (τᵢ − λ) · <strong>1</strong>{τᵢ > λ} + (τᵢ + λ) · <strong>1</strong>{τᵢ &lt; −λ}</div>
+            <div class="quote-translation">
+              📝 公式做的事情只有三条规则：<br>
+              &nbsp;&nbsp;• <strong>τᵢ > +λ</strong>（正的大值）：结果 = τᵢ − λ　← 保留，但缩小一点<br>
+              &nbsp;&nbsp;• <strong>τᵢ &lt; −λ</strong>（负的大值）：结果 = τᵢ + λ　← 保留，但往零靠近一点<br>
+              &nbsp;&nbsp;• <strong>−λ ≤ τᵢ ≤ +λ</strong>（绝对值小）：结果 = 0　　← 直接归零（去掉噪声）<br>
+              &nbsp;&nbsp;• <strong>1{条件}</strong> 是指示函数：条件成立 = 1，不成立 = 0
+            </div>
+          </div>
+          <p style="font-size:0.88em; color:#4a5568; margin:12px 0 6px;">用示意图理解（横轴 = 输入 τᵢ，纵轴 = 输出）：</p>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.83em; font-family:monospace; line-height:1.9; color:#2d3748;">
+            输出<br>
+            　|　　　　　　　　　/<br>
+            　|　　　　　　　　/<br>
+            +λ|－－－－－－－/<br>
+            　|　　　　　　/<br>
+            　|_________/___________________→ 输入 τᵢ<br>
+            　|　　　　　　\<br>
+            -λ|－－－－－－－\<br>
+            　|　　　　　　　　\<br>
+            　|　　 -λ　　0　　+λ<br>
+            　　　　 ↑___________↑<br>
+            　　　　 这个区间内全部归零
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">③ 软阈值 vs 硬阈值：为什么选软的？</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="compare-box compare-bad">
+              <div class="compare-box-title">❌ 硬阈值</div>
+              <p style="line-height:1.8;">τᵢ &gt; λ → 完全保留（不变）<br>τᵢ &lt; λ → 直接归零<br><br>在 λ 处有<strong>跳跃</strong>，函数不连续，数值计算不稳定。</p>
+            </div>
+            <div class="compare-box compare-good">
+              <div class="compare-box-title">✅ 软阈值</div>
+              <p style="line-height:1.8;">τᵢ &gt; λ → 缩小后保留（τᵢ − λ）<br>τᵢ &lt; λ → 直接归零<br><br>函数<strong>连续</strong>，在 λ 处平滑过渡，数学性质好。</p>
+            </div>
+          </div>
+          <div class="mini-analogy" style="margin-top:12px;">
+            <strong>📚 理论依据：</strong>原文引用了 Donoho（1995）的经典论文 <em>"De-noising by soft-thresholding"</em>，这是统计学和信号处理领域处理稀疏信号的标准去噪方法，有近 30 年历史，有严格的最优性证明。
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">④ λ 怎么选？交叉验证自动确定</div>
+          <p style="font-size:0.88em; color:#4a5568; margin-bottom:10px;">λ 不是人工拍脑袋定的，原文用交叉验证自动从数据里选：</p>
+          <div style="background:#f7fafc; border-radius:10px; padding:14px; font-size:0.84em; line-height:1.9;">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#9f7aea; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">1</div>
+                <div>用 Step 4 集成结果算出初始归因分数 τ_M(z)</div>
+              </div>
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#9f7aea; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">2</div>
+                <div>列出一系列候选 λ 值，例如 {0.001, 0.005, 0.01, 0.05, 0.1, 0.5}</div>
+              </div>
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#9f7aea; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">3</div>
+                <div>对每个候选 λ，用软阈值处理归因分数，得到 τ_λ(z)</div>
+              </div>
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#9f7aea; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">4</div>
+                <div>计算每个 τ_λ(z) 的 <strong>LDS 分数</strong>（用已有模型评估归因质量）</div>
+              </div>
+              <div style="display:flex; align-items:flex-start; gap:10px;">
+                <div style="background:#48bb78; color:white; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:700; flex-shrink:0; margin-top:1px;">5</div>
+                <div>选 LDS <strong>最高</strong>的那个 λ，记作 λ̂，用于最终计算</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px; font-size:0.83em; text-align:center;">
+            <div style="background:#fff5f5; border-radius:8px; padding:10px; border:1px solid #fc8181;">
+              <div style="font-weight:700; color:#c53030;">λ 太小</div>
+              <div style="color:#742a2a; margin-top:4px;">噪声没去干净<br>LDS 偏低 ❌</div>
+            </div>
+            <div style="background:#f0fff4; border-radius:8px; padding:10px; border:2px solid #48bb78;">
+              <div style="font-weight:700; color:#276749;">λ 刚好 ✅</div>
+              <div style="color:#22543d; margin-top:4px;">只去噪声<br>LDS 最高 🏆</div>
+            </div>
+            <div style="background:#fff5f5; border-radius:8px; padding:10px; border:1px solid #fc8181;">
+              <div style="font-weight:700; color:#c53030;">λ 太大</div>
+              <div style="color:#742a2a; margin-top:4px;">真实信号也丢了<br>LDS 偏低 ❌</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑤ 数字例子：完整计算一遍</div>
+          <p style="font-size:0.85em; color:#718096; margin-bottom:10px;">假设 λ̂ = 0.05，集成后归因向量为：</p>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:2; color:#2d3748; margin-bottom:10px;">
+            τ_M = [0.02, -0.01, 0.79, 0.03, -0.08, 0.31, -0.04]
+          </div>
+          <div style="background:#f7fafc; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; line-height:2.1; color:#2d3748; margin-bottom:10px;">
+            τ₁ =  0.02：|0.02| &lt; 0.05 → <strong style="color:#718096;">归零　　　　→ 0</strong><br>
+            τ₂ = -0.01：|-0.01| &lt; 0.05 → <strong style="color:#718096;">归零　　　　→ 0</strong><br>
+            τ₃ =  0.79：0.79 &gt; 0.05 　→ <strong style="color:#276749;">0.79 − 0.05 → 0.74 ✅</strong><br>
+            τ₄ =  0.03：|0.03| &lt; 0.05 → <strong style="color:#718096;">归零　　　　→ 0</strong><br>
+            τ₅ = -0.08：-0.08 &lt; -0.05 → <strong style="color:#276749;">-0.08 + 0.05 → -0.03 ✅</strong><br>
+            τ₆ =  0.31：0.31 &gt; 0.05 　→ <strong style="color:#276749;">0.31 − 0.05 → 0.26 ✅</strong><br>
+            τ₇ = -0.04：|-0.04| &lt; 0.05 → <strong style="color:#718096;">归零　　　　→ 0</strong>
+          </div>
+          <div style="background:#f0fff4; border-radius:8px; padding:12px; font-size:0.84em; font-family:monospace; color:#276749; border-left:3px solid #48bb78;">
+            τ_TRAK = [0, 0, <strong>0.74</strong>, 0, <strong>-0.03</strong>, <strong>0.26</strong>, 0]<br>
+            <span style="color:#718096; font-family:sans-serif; font-size:0.9em;">噪声清除，只剩样本3（强正影响）、样本5（弱负影响）、样本6（中正影响）</span>
+          </div>
+        </div>
+
+        <div class="expand-section">
+          <div class="expand-section-title">⑥ 最终完整公式（原文 Equation 17）</div>
+          <div class="original-quote">
+            <div class="quote-label">📄 原文 Equation (17) — TRAK 最终估计量</div>
+            <div class="formula-box">τ<sub>TRAK</sub>(z, S) := S( [(1/M) Σ φ<sub>m</sub>(z)<sup>T</sup>(Φ<sub>m</sub><sup>T</sup>Φ<sub>m</sub>)<sup>-1</sup>Φ<sub>m</sub><sup>T</sup>] × [(1/M) Σ Q<sub>m</sub>] ; λ̂ )</div>
+            <div class="quote-translation">
+              📝 整个公式的结构：<br>
+              &nbsp;&nbsp;• 内层 <strong>[ ] × [ ]</strong>：Step 4 的集成结果（先平均特征部分和概率部分，再相乘）<br>
+              &nbsp;&nbsp;• 外层 <strong>S( · ; λ̂ )</strong>：Step 5 的软阈值处理（用交叉验证选出的最优 λ̂）<br>
+              &nbsp;&nbsp;→ 这就是 TRAK 的完整最终输出
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🌍 TRAK 如何适应不同任务</h2>
+      <div class="app-grid">
+        <div class="app-card" style="border-color: #4299e1;">
+          <h4>🖼️ 图像分类（ImageNet）</h4>
+          <p>用模型输出的"正确类别概率的对数几率"作为输出函数，能找到哪些训练图片影响了对某张图的分类</p>
+        </div>
+        <div class="app-card" style="border-color: #48bb78;">
+          <h4>💬 文本理解（BERT/QNLI）</h4>
+          <p>同样的框架，直接应用到自然语言推理任务，找到影响判断的训练句子对</p>
+        </div>
+        <div class="app-card" style="border-color: #9f7aea;">
+          <h4>🖼️+💬 多模态（CLIP）</h4>
+          <p>把CLIP的对比损失转换为分类问题，归因找到影响图文配对的关键训练样本</p>
+        </div>
+        <div class="app-card" style="border-color: #ed8936;">
+          <h4>📝 语言模型事实追踪（mT5）</h4>
+          <p>追踪语言模型"知道某个事实"是从哪些训练文本学来的</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 第四步：结果 ==================== -->
+  <div id="results" class="section">
+    <div class="card">
+      <h2>📊 核心结果：速度-精度对比</h2>
+      <p style="color:#718096; margin-bottom:20px; font-size:0.9em;">LDS 分数越高越好（精度）；所用模型数越少越好（速度）</p>
+
+      <h3 style="margin-bottom:14px;">在 CIFAR-10 上的 LDS 分数（分数越高越准确）</h3>
+      <div class="chart-row"><div class="chart-label">TRAK (本文)</div><div class="chart-bar-wrap"><div class="chart-bar bar-trak" style="width:90%">0.27</div></div><div class="chart-val">✅ 最佳</div></div>
+      <div class="chart-row"><div class="chart-label">Datamodels</div><div class="chart-bar-wrap"><div class="chart-bar bar-data" style="width:75%">0.20</div></div><div class="chart-val">需5000模型</div></div>
+      <div class="chart-row"><div class="chart-label">TracIn</div><div class="chart-bar-wrap"><div class="chart-bar bar-tracin" style="width:20%">0.06</div></div><div class="chart-val">❌ 差</div></div>
+      <div class="chart-row"><div class="chart-label">影响函数 IF</div><div class="chart-bar-wrap"><div class="chart-bar bar-if" style="width:12%">0.04</div></div><div class="chart-val">❌ 最差</div></div>
+
+      <div style="border-top:1px solid #e2e8f0; padding-top:20px; margin-top:20px;">
+        <h3 style="margin-bottom:14px;">在 QNLI 上的 LDS 分数</h3>
+        <div class="chart-row"><div class="chart-label">TRAK (本文)</div><div class="chart-bar-wrap"><div class="chart-bar bar-trak" style="width:95%">0.42</div></div><div class="chart-val">✅ 最佳</div></div>
+        <div class="chart-row"><div class="chart-label">Datamodels</div><div class="chart-bar-wrap"><div class="chart-bar bar-data" style="width:80%">0.34</div></div><div class="chart-val">需20000模型</div></div>
+        <div class="chart-row"><div class="chart-label">TracIn</div><div class="chart-bar-wrap"><div class="chart-bar bar-tracin" style="width:18%">0.08</div></div><div class="chart-val">❌ 差</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⏱️ 速度对比：TRAK 有多快？</h2>
+      <table class="compare-table">
+        <tr>
+          <th>方法</th>
+          <th>所需模型数</th>
+          <th>CIFAR-10 耗时</th>
+          <th>精度（LDS）</th>
+          <th>评价</th>
+        </tr>
+        <tr>
+          <td><strong>TRAK（本文）</strong></td>
+          <td>20个</td>
+          <td>20 分钟</td>
+          <td>0.27</td>
+          <td><span class="badge good">✅ 速度精度双赢</span></td>
+        </tr>
+        <tr>
+          <td>Datamodels</td>
+          <td>5,000个</td>
+          <td>2,500 分钟</td>
+          <td>0.20</td>
+          <td><span class="badge bad">🐢 慢125倍但精度还不如TRAK</span></td>
+        </tr>
+        <tr>
+          <td>影响函数 IF</td>
+          <td>1个</td>
+          <td>20,000 分钟</td>
+          <td>0.04</td>
+          <td><span class="badge bad">❌ 最慢且最不准</span></td>
+        </tr>
+        <tr>
+          <td>TracIn</td>
+          <td>20个</td>
+          <td>60 分钟</td>
+          <td>0.06</td>
+          <td><span class="badge medium">⚠️ 速度可以但精度差</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>🧪 三个应用场景的结果</h2>
+
+      <h3>① CLIP 图文模型归因</h3>
+      <div style="background:#f7fafc; border-radius:10px; padding:16px; margin:10px 0; font-size:0.88em;">
+        <p>实验：删除最"重要"的训练数据，看模型是否失去了图文匹配能力</p>
+        <p style="margin-top:8px;">结果：删除 TRAK 识别的 400 条训练数据后，图文相似度下降 <strong>0.36</strong>（非常显著）</p>
+        <p>对比：删除 CLIP 最近邻识别的数据，只下降 <strong>0.11</strong>；TracIn 识别的数据几乎<strong>无影响</strong></p>
+        <p style="margin-top:8px; color:#48bb78; font-weight:600;">→ TRAK 找到的才是真正"关键"的训练数据</p>
+      </div>
+
+      <h3>② 语言模型事实追踪</h3>
+      <div style="background:#f7fafc; border-radius:10px; padding:16px; margin:10px 0; font-size:0.88em;">
+        <p>实验：追踪语言模型学会某个事实，是从哪些训练文本中学到的</p>
+        <p style="margin-top:8px;">
+          删除 TRAK 识别的文本 → 模型准确率下降 <strong>34%</strong><br>
+          删除 BM25（信息检索方法）识别的文本 → 下降 <strong>10%</strong><br>
+          删除标注的"真实来源文本" → 下降 <strong>12%</strong>
+        </p>
+        <p style="margin-top:8px; color:#48bb78; font-weight:600;">→ TRAK 找到的是模型"实际学习来源"，而非表面上的文本相似</p>
+      </div>
+
+      <h3>③ 预测脆弱性（brittleness）</h3>
+      <div style="background:#f7fafc; border-radius:10px; padding:16px; margin:10px 0; font-size:0.88em;">
+        <p>用 TRAK（100个模型）可以达到 Datamodels（50,000个模型）的效果</p>
+        <p style="margin-top:8px; color:#48bb78; font-weight:600;">→ 下游应用也节省了500倍计算成本</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// 记录当前展开的内容 id 和对应的行内按钮
+let currentOpenId = null;
+let currentOpenBtn = null;
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-card').forEach(c => c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = ['overview','problem','method','results'].indexOf(id);
+  document.querySelectorAll('.nav-card')[idx].classList.add('active');
+  window.scrollTo({top: 200, behavior: 'smooth'});
+}
+
+function toggleExpand(contentId, btn) {
+  const content = document.getElementById(contentId);
+  const isOpen = content.classList.contains('open');
+  const floatBtn = document.getElementById('floatCloseBtn');
+
+  if (isOpen) {
+    // 关闭
+    content.classList.remove('open');
+    btn.classList.remove('open');
+    btn.textContent = '📖 详细讲解 ▼';
+    floatBtn.classList.remove('visible');
+    currentOpenId = null;
+    currentOpenBtn = null;
+  } else {
+    // 先关闭之前打开的（如果有）
+    if (currentOpenId && currentOpenId !== contentId) {
+      const prev = document.getElementById(currentOpenId);
+      if (prev) prev.classList.remove('open');
+      if (currentOpenBtn) {
+        currentOpenBtn.classList.remove('open');
+        currentOpenBtn.textContent = '📖 详细讲解 ▼';
+      }
+    }
+    // 打开新的
+    content.classList.add('open');
+    btn.classList.add('open');
+    btn.textContent = '📖 详解已展开 ✓';
+    floatBtn.classList.add('visible');
+    currentOpenId = contentId;
+    currentOpenBtn = btn;
+    setTimeout(() => content.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  }
+}
+
+// 浮动按钮点击：收起当前展开的内容，并滚回行内按钮位置
+function closeCurrentExpand() {
+  const floatBtn = document.getElementById('floatCloseBtn');
+  if (floatBtn) floatBtn.classList.remove('visible');
+
+  if (currentOpenId) {
+    const content = document.getElementById(currentOpenId);
+    if (content) content.classList.remove('open');
+  }
+
+  const btnToScrollTo = currentOpenBtn;
+  if (btnToScrollTo) {
+    btnToScrollTo.classList.remove('open');
+    btnToScrollTo.textContent = '📖 详细讲解 ▼';
+  }
+
+  currentOpenId = null;
+  currentOpenBtn = null;
+
+  // 滚回行内按钮，放在状态清空之后单独执行
+  if (btnToScrollTo) {
+    setTimeout(() => {
+      if (btnToScrollTo && document.body.contains(btnToScrollTo)) {
+        btnToScrollTo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
+  }
+}
+</script>
+</body>
+</html>
