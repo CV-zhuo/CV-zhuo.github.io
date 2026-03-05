@@ -3,5 +3,10 @@
     "title": "TRAK paper guide",
     "href": "TRAK_paper_guide.html",
     "date": "2026-03-05"
+  },
+  {
+    "title": "Understanding Black-box Predictions via Influence Functions",
+    "href": "Understanding Black-box Predictions via Influence Functions.md",
+    "date": "2026-03-05"
   }
 ]
