@@ -20,4 +20,9 @@ body.with-nav{padding-top:56px}
 .about-card h3{color:#fff;margin:0 0 8px 0;font-weight:500}
 .about-card .placeholder{color:#9aa0a6}
 
+body.about-open main{overflow:auto;height:auto}
+body.about-open .content-main{position:relative;height:auto;min-height:100vh;padding-bottom:24px}
+body.about-open .content{height:auto;min-height:100vh}
+body.about-open #card{height:auto;min-height:100vh}
+
 html{scroll-behavior:smooth}
