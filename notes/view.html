@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+  <title>Note</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/site.css">
+  <style>
+    .md-wrap{width:100%;max-width:900px;margin:0 auto;padding:24px 16px}
+    .md-card{background:#2b2c2f;border-radius:12px;padding:20px;color:#e6e6e6;line-height:1.7}
+    .md-card h1,.md-card h2,.md-card h3{color:#fff}
+    .md-card pre{background:#1f2022;padding:12px;border-radius:8px;overflow:auto}
+    .md-card code{font-family:Menlo,Monaco,Consolas,monospace}
+    .md-title{margin:0 0 12px 0}
+  </style>
+</head>
+<body class="with-nav">
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <div class="left">
+        <a class="brand" href="../" aria-label="Home"><i class="icon icon-github"></i>CV</a>
+      </div>
+      <div class="right">
+        <a href="../" aria-label="Home"><i class="icon icon-bokeyuan"></i>Home</a>
+        <a href="./" aria-label="Notes" class="active"><i class="icon icon-book"></i>Notes</a>
+        <a href="../index.html#about" aria-label="About"><i class="icon icon-xiaolian"></i>About</a>
+      </div>
+    </div>
+  </nav>
+  <main class="md-wrap" style="background:#222325;min-height:100vh;">
+    <h1 class="notes-title">Note</h1>
+    <div id="md" class="md-card"></div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    function getParam(name){
+      const m = new RegExp('[?&]'+name+'=([^&]*)').exec(location.search);
+      return m? decodeURIComponent(m[1]): '';
+    }
+    async function render(){
+      const file = getParam('file');
+      if(!file){
+        document.getElementById('md').textContent = '缺少文件参数';
+        return;
+      }
+      if(/\.html?$/i.test(file)){
+        location.href = file;
+        return;
+      }
+      try{
+        const res = await fetch(file,{cache:'no-store'});
+        if(!res.ok) throw new Error('Load failed');
+        const txt = await res.text();
+        const html = marked.parse(txt);
+        document.getElementById('md').innerHTML = html;
+      }catch(e){
+        document.getElementById('md').textContent = '加载失败';
+      }
+    }
+    render();
+  </script>
+</body>
+</html>

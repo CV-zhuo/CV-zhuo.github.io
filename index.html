@@ -12,6 +12,7 @@
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SimonAKing/font/font.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/site.css">
     
     <meta http-equiv="x-dns-prefetch-control" content="on">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
@@ -33,7 +34,19 @@
     <![endif]-->
 </head>
 
-<body>
+<body class="with-nav">
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <div class="left">
+                <a class="brand" href="./" aria-label="Home"><i class="icon icon-github"></i>CV</a>
+            </div>
+            <div class="right">
+                <a href="./" aria-label="Home"><i class="icon icon-bokeyuan"></i>Home</a>
+                <a href="notes/index.html" aria-label="Notes"><i class="icon icon-book"></i>Notes</a>
+                <a href="#about" aria-label="About" id="nav-about"><i class="icon icon-xiaolian"></i>About</a>
+            </div>
+        </div>
+    </nav>
     <main>
         <div class="content content-intro">
             <div class="content-inner">
@@ -79,19 +92,121 @@
                     <ul>
                         <li><a href="blog/" aria-label="Blog"><i class="icon icon-bokeyuan"></i><span data-translate="Blog">Blog</span></a></li>
                         
-                        <!-- ========================================== -->
-                        <!-- ⭐ 修改位置：在这里增加了论文笔记入口 ⭐ -->
-                        <!-- ========================================== -->
-                        <li><a href="notes/TRAK_paper_guide.html" aria-label="Notes"><i class="icon icon-book"></i><span data-translate="Notes">Notes</span></a></li>
-                        <!-- ========================================== -->
+                        <li><a href="notes/index.html" aria-label="Notes"><i class="icon icon-book"></i><span data-translate="Notes">Notes</span></a></li>
 
-                        <li><a href="about/" aria-label="About"><i class="icon icon-xiaolian"></i><span data-translate="About">About</span></a></li>
+                        <li><a href="#about" aria-label="About"><i class="icon icon-xiaolian"></i><span data-translate="About">About</span></a></li>
                         <li><a href="mailto:zhuoshihao99@gmail.com" aria-label="Email" target="_blank"><i class="icon icon-email"></i><span data-translate="Email">Email</span></a></li>
                         <li><a href="https://github.com/CV-zhuo" aria-label="Github" target="_blank"><i class="icon icon-github"></i><span data-translate="Github">Github</span></a></li>
                     </ul>
                 </div>
             </div>
             <canvas class="grid-background" id="gridCanvas"></canvas>
+            <section id="about" class="about-section">
+                <div class="about-card">
+                    <h3>教育经历</h3>
+                    <ul style="margin:0;padding-left:18px;color:#e6e6e6;line-height:1.7;">
+                        <li>
+                            宁波大学，计算机科学与技术，工学学士
+                            <span style="color:#9aa0a6;">（2018.9 - 2024.6）</span>
+                            <div style="color:#9aa0a6;">校三等奖学金 / 优秀团员 / 校级优秀学生干部 / 宁波大学优秀团支书</div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="about-card">
+                    <h3>技术能力</h3>
+                    <div style="color:#e6e6e6;line-height:1.7;">
+                        Python、PyTorch、JavaScript、HTML、CSS、SQL、C/C++、LaTeX、Linux、macOS、MongoDB、OpenGuass、CET-4
+                    </div>
+                </div>
+                <div class="about-card">
+                    <h3>工作（实习）经历</h3>
+                    <ul style="margin:0;padding-left:18px;color:#e6e6e6;line-height:1.7;">
+                        <li>
+                            北部战区海军，战士
+                            <span style="color:#9aa0a6;">（2019.09 - 2021.09）</span>
+                        </li>
+                        <li>
+                            宁波市泰惠医院信息咨询有限公司，开发工程师（实习）
+                            <span style="color:#9aa0a6;">（2023.04 - 2023.07）</span>
+                            <div style="color:#9aa0a6;">
+                                开发微信小程序形式的“二位一体”志愿推荐系统；基于微信云数据库实现数据存储与操作；取得软件著作权一项。
+                            </div>
+                        </li>
+                        <li>
+                            安莱科半导体（常州）有限公司，实习助理
+                            <span style="color:#9aa0a6;">（2024.07 - 2024.10）</span>
+                            <div style="color:#9aa0a6;">
+                                参与图像算法模型测试与调研，基于 YOLOv8 进行目标检测的数据处理与模型优化；制作并清洗数据集，保障数据准确性与模型性能。
+                            </div>
+                        </li>
+                        <li>
+                            上海交通大学，科研助理
+                            <span style="color:#9aa0a6;">（2024.11 - 至今）</span>
+                            <div style="color:#9aa0a6;">
+                                网站系统搭建：基于 XAMPP 8.0 与 WordPress 5.8 独立搭建与维护网站，提升在线服务质量。<br>
+                                医学影像处理系统：构建基于异质人工智能与多模态的图像任务管理，支持多种认知测量任务，包括量表管理、测验、图像上传与数据收集。<br>
+                                认知测验知识题库：基于问卷星平台建立标准化题库。
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="about-card">
+                    <h3>项目经历</h3>
+                    <ul style="margin:0;padding-left:18px;color:#e6e6e6;line-height:1.7;">
+                        <li>
+                            基于轻量型深度模型的肋骨骨折精准诊断方法研究
+                            <span style="color:#9aa0a6;">（2022.03 - 2023.03）</span>
+                            <div style="color:#9aa0a6;">
+                                面向胸部 CT 图像设计轻量网络，实现肋骨骨折区域的精准定位、分割与诊断报告生成；对比医生诊断与模型预测结果，评估图像与文本的准确率、召回率、加权损失率及误诊率。
+                            </div>
+                        </li>
+                        <li>
+                            基于中心损失的 MRI 图像分类方法
+                            <span style="color:#9aa0a6;">（2024.01 - 2024.05）</span>
+                            <div style="color:#9aa0a6;">
+                                通过扩散模型与抽样迁移技术，对齐未知中心数据与已知中心数据；缓解缺失类别在中心数据识别中的数据质量问题，提升泛化能力。
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="about-card">
+                    <h3>专利 / 软著</h3>
+                    <ul style="margin:0;padding-left:18px;color:#e6e6e6;line-height:1.7;">
+                        <li>
+                            基于中心 MRI 图像分类方法，专利
+                            <span style="color:#9aa0a6;">（2023.09）</span>
+                            <div style="color:#9aa0a6;">
+                                通过设置重建损失分离内容与风格特征，提升中心数据分类任务的表征与泛化能力，增强网络稳定性。
+                            </div>
+                        </li>
+                        <li>
+                            一种 sMRI 图像脑序多分类方法，专利
+                            <span style="color:#9aa0a6;">（2023.09）</span>
+                            <div style="color:#9aa0a6;">
+                                构建非同质性度量以保持类间距离与类内一致性，提升不同类别 sMRI 图像特征的区分度。
+                            </div>
+                        </li>
+                        <li>
+                            基于中心损失与注意力机制的单分类器的 sMRI 图像分类方法，专利
+                            <span style="color:#9aa0a6;">（2023.09）</span>
+                            <div style="color:#9aa0a6;">
+                                在无监督 U-Net 中引入中心损失并结合注意力机制，突出关键区域，学习各分类核心特征，实现有效区分。
+                            </div>
+                        </li>
+                        <li>
+                            一种基于扩散模型的 sMRI 图像分类方法，专利
+                            <span style="color:#9aa0a6;">（2023.05）</span>
+                            <div style="color:#9aa0a6;">
+                                构建生成模型并采用扩散模型进行数据增强，提升对不同类别 sMRI 图像的分类效果与泛化能力。
+                            </div>
+                        </li>
+                        <li>
+                            三位一体结合模型的高精度小型程序，软件著作权
+                            <span style="color:#9aa0a6;">（2023.05）</span>
+                        </li>
+                    </ul>
+                </div>
+            </section>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
@@ -130,6 +245,7 @@
         </script>
         <script src="js/main.js"></script>
         <script src="js/background.js"></script>
+        <script src="js/site.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/SimonAKing/js/log.min.js"></script>
     </main>
 </body>

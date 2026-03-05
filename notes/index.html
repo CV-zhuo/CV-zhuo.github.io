@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+  <title>Notes</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/site.css">
+</head>
+<body class="with-nav">
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <div class="left">
+        <a class="brand" href="../" aria-label="Home"><i class="icon icon-github"></i>CV</a>
+      </div>
+      <div class="right">
+        <a href="../" aria-label="Home"><i class="icon icon-bokeyuan"></i>Home</a>
+        <a href="./" aria-label="Notes" class="active"><i class="icon icon-book"></i>Notes</a>
+        <a href="../index.html#about" aria-label="About"><i class="icon icon-xiaolian"></i>About</a>
+      </div>
+    </div>
+  </nav>
+  <main class="notes-wrap" style="background:#222325;min-height:100vh;">
+    <h1 class="notes-title">Notes</h1>
+    <ul id="notes-list" class="notes-grid"></ul>
+    <div id="empty" style="display:none;color:#bbb;padding:12px 0;">暂无笔记</div>
+  </main>
+  <script>
+    const listEl = document.getElementById('notes-list');
+    const emptyEl = document.getElementById('empty');
+    function normalizeTitle(name){
+      return name.replace(/\.(html|md)$/i,'').replace(/[_-]+/g,' ').trim();
+    }
+    function toViewerLink(href){
+      if(/\.(md)$/i.test(href)) return 'view.html?file='+encodeURIComponent(href);
+      return href;
+    }
+    function parseDate(d){
+      if(!d) return 0;
+      const t = Date.parse(d);
+      return isNaN(t)?0:t;
+    }
+    function render(items){
+      listEl.innerHTML = '';
+      if(!items || items.length === 0){
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      const sorted = items.slice().sort((a,b)=>parseDate(b.date)-parseDate(a.date));
+      sorted.forEach(item=>{
+        const li = document.createElement('li');
+        li.className = 'note-item';
+        const a = document.createElement('a');
+        a.className = 'note-link';
+        a.href = toViewerLink(item.href);
+        const left = document.createElement('span');
+        left.className = 'note-title';
+        const icon = document.createElement('i');
+        icon.className = 'icon icon-book';
+        const title = document.createElement('span');
+        title.textContent = item.title || normalizeTitle(item.href);
+        left.appendChild(icon);
+        left.appendChild(title);
+        const date = document.createElement('span');
+        date.className = 'note-date';
+        date.textContent = item.date || '';
+        a.appendChild(left);
+        a.appendChild(date);
+        li.appendChild(a);
+        listEl.appendChild(li);
+      });
+    }
+    async function loadFromManifest(){
+      try{
+        const res = await fetch('./index.json',{cache:'no-store'});
+        if(res.ok){
+          const data = await res.json();
+          if(Array.isArray(data)){
+            render(data);
+            return true;
+          }
+        }
+      }catch(e){}
+      return false;
+    }
+    async function loadFromDirIndex(){
+      try{
+        const res = await fetch('./',{cache:'no-store'});
+        if(res.ok){
+          const html = await res.text();
+          const el = document.createElement('div');
+          el.innerHTML = html;
+          const links = Array.from(el.querySelectorAll('a')).map(a=>a.getAttribute('href')).filter(Boolean);
+          const files = links.filter(h=>!h.startsWith('../') && h !== 'index.html' && /\.(html|md)$/i.test(h));
+          const items = files.map(h=>({href:h,title:normalizeTitle(decodeURIComponent(h))}));
+          render(items);
+          return true;
+        }
+      }catch(e){}
+      return false;
+    }
+    (async function init(){
+      const ok = await loadFromManifest() || await loadFromDirIndex();
+      if(!ok) render([]);
+    })();
+  </script>
+</body>
+</html>
