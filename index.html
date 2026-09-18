@@ -19,13 +19,13 @@
     <link rel="prefetch" href="https://cdn.jsdelivr.net/">
 
     <meta name="author" content="Shihao Zhuo">
-    <meta name="description" content="Shihao Zhuo — MSc student in Artificial Intelligence and Machine Learning at the University of Birmingham. Data-centric AI: training-free data quality signals, noisy-label curation, and generation guidance.">
-    <meta name="keywords" content="Shihao Zhuo, data-centric AI, data curation, noisy labels, Mahalanobis distance, OOD detection, machine learning">
+    <meta name="description" content="Shihao Zhuo — MSc student in Artificial Intelligence and Machine Learning at the University of Birmingham. Data-centric AI: training-free data quality signals, noisy-label curation, generation guidance, and continual learning.">
+    <meta name="keywords" content="Shihao Zhuo, data-centric AI, continual learning, data curation, noisy labels, data selection, OOD detection, machine learning">
     <link rel="canonical" href="https://cv-zhuo.github.io/">
 
     <meta property="og:type" content="profile">
     <meta property="og:title" content="Shihao Zhuo — Data-centric AI">
-    <meta property="og:description" content="MSc student in AI and Machine Learning, University of Birmingham. Training-free data quality signals for curation and generation guidance.">
+    <meta property="og:description" content="MSc student in AI and Machine Learning, University of Birmingham. Data-centric AI and continual learning: training-free data quality signals for curation and generation guidance.">
     <meta property="og:url" content="https://cv-zhuo.github.io/">
     <meta property="og:image" content="https://cv-zhuo.github.io/assets/CV.jpeg">
     <meta name="twitter:card" content="summary">
@@ -86,7 +86,7 @@
                     <header>
                         <img src="assets/CV.jpeg" width="100" height="100" alt="Portrait of Shihao Zhuo">
                         <h1>Shihao Zhuo</h1>
-                        <h2 id="signature">Data-centric AI &nbsp;·&nbsp; Representation Geometry</h2>
+                        <h2 id="signature">Data-centric AI &nbsp;·&nbsp; Continual Learning</h2>
                     </header>
                     <ul>
                         <li><a href="#about" aria-label="About"><i class="icon icon-xiaolian"></i><span>About</span></a></li>
@@ -111,10 +111,17 @@
                     <p>
                         My work so far has been <strong>data-centric</strong>: deciding which training examples are worth
                         keeping, before any model is trained on them. My most recent project,
-                        <a href="#publications">RMD<sup>2</sup></a>, fits a single class-conditional geometry on frozen
-                        embeddings and reuses it for three jobs — ranking noisy candidates, constraining a continuous
-                        generator, and building preference pairs for a language model — without training a task-specific
-                        proxy for any of them.
+                        <a href="#publications">RMD<sup>2</sup></a>, scores how well a sample fits the class it was
+                        labelled with — using only a small trusted reference set and a frozen encoder — and reuses that
+                        one signal for three jobs: ranking noisy candidates, constraining a continuous generator, and
+                        building preference pairs for a language model, without training a task-specific proxy for any
+                        of them.
+                    </p>
+                    <p>
+                        I am also interested in <strong>continual learning</strong>: how a model keeps taking in new
+                        knowledge without overwriting what it already has, and how the choice of training data decides
+                        what survives. To me it is the same question as curation seen from the other side — curation
+                        asks what is worth learning, continual learning asks what is worth keeping.
                     </p>
                     <p class="muted">
                         I am looking for a PhD position starting in 2027. If this overlaps with your group's work,
@@ -134,11 +141,11 @@
                             <span class="tag">Under review — AAAI 2027</span>
                         </p>
                         <p>
-                            A class-conditional conformity geometry that needs <strong>no task-proxy training</strong>.
+                            A class-conditional conformity measure that needs <strong>no task-proxy training</strong>.
                             For each class we fit an MRCD robust covariance and a regularised precision matrix on a small
                             trusted reference set in a frozen embedding space; an <strong>inter-class Mahalanobis
                             margin</strong> — rather than an absolute distance — decides whether a sample agrees with the
-                            label it was given. The fitted geometry then exposes three interfaces: the margin ranks
+                            label it was given. The same fitted statistics then expose three interfaces: the margin ranks
                             candidates for curation and for discrete preference pairs, while the analytic gradient of the
                             within-class distance constrains continuous generators.
                         </p>
@@ -146,7 +153,7 @@
                             <li><span class="stat-num">98.8 / 99.9%</span><span class="stat-label">detection AUROC on CIFAR-10N / CLINC150</span></li>
                             <li><span class="stat-num">0.56 / 0.02%</span><span class="stat-label">residual noise left in the selected set</span></li>
                             <li><span class="stat-num">19.7&times;</span><span class="stat-label">less peak memory than the runner-up; fastest of eight methods</span></li>
-                            <li><span class="stat-num">&minus;11.0%</span><span class="stat-label">FID when the same geometry guides a conditional GAN</span></li>
+                            <li><span class="stat-num">&minus;11.0%</span><span class="stat-label">FID when the same signal guides a conditional GAN</span></li>
                         </ul>
                     </article>
                 </div>
