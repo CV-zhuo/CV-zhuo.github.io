@@ -1,28 +1,178 @@
-body.with-nav{padding-top:56px}
-.site-nav{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(34,35,37,.85);backdrop-filter:saturate(120%) blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;border-bottom:1px solid rgba(255,255,255,.06)}
-.site-nav .nav-inner{width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
-.site-nav a{display:inline-flex;align-items:center;gap:8px;color:var(--color-link);padding:10px 12px;border-radius:8px;transition:background .2s ease, color .2s ease}
-.site-nav a:hover{background:rgba(255,255,255,.06);color:var(--color-link-hover)}
-.site-nav .brand{color:#fff;font-weight:600;letter-spacing:.3px}
-.site-nav .right a.active{background:#2f3033;color:#fff}
+/* ------------------------------------------------------------------
+   site.css — layer on top of the HomePage template (css/style.css).
+   Everything here is additive; style.css is untouched.
+   ------------------------------------------------------------------ */
 
-.notes-wrap{width:100%;max-width:900px;margin:0 auto;padding:24px 16px}
-.notes-title{margin:0 0 12px 0;color:#fff;font-weight:400}
-.notes-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-.note-item{background:#2b2c2f;border-radius:10px;padding:12px 14px;transition:transform .2s ease,background .2s ease}
-.note-item:hover{transform:translateY(-2px);background:#303135}
-.note-link{display:flex;align-items:center;justify-content:space-between;color:var(--color-link)}
-.note-title{display:flex;align-items:center;gap:10px}
-.note-date{font-size:.85rem;color:#9aa0a6;background:#1f2022;padding:4px 8px;border-radius:6px}
+/* --- typography -----------------------------------------------------
+   The base template ships Comic Sans MS as its first font. Override it
+   with a neutral system stack. To go back to the template's look,
+   delete this one block. */
+body,
+.content-title,
+.content-subtitle,
+#card .card-inner header h1,
+#card .card-inner header h2,
+.site-nav,
+.about-section {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    Arial, sans-serif !important;
+}
+.content-title { font-weight: 300; letter-spacing: .01em; }
+.content-subtitle { letter-spacing: .08em; }
 
-.about-section{width:100%;max-width:900px;margin:0 auto;padding:24px 16px}
-.about-card{background:#2b2c2f;border-radius:12px;padding:20px;margin-bottom:14px}
-.about-card h3{color:#fff;margin:0 0 8px 0;font-weight:500}
-.about-card .placeholder{color:#9aa0a6}
+/* The template paints its background on .content-main, which stops being
+   full-height once About opens — give body the same colour so nothing flashes. */
+body { background: #222325 }
 
-body.about-open main{overflow:auto;height:auto}
-body.about-open .content-main{position:relative;height:auto;min-height:100vh;padding-bottom:24px}
-body.about-open .content{height:auto;min-height:100vh}
-body.about-open #card{height:auto;min-height:100vh}
+/* --- inline SVG icons (the bundled icon font has no document/download glyph) */
+.icon-svg { display: block; width: 1.5em; height: 1.5em; margin: 0 auto; line-height: 0 }
+.icon-svg svg {
+  width: 1.05em; height: 1.05em; display: block; margin: 0 auto;
+  fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.site-nav .icon-svg { width: 1.1em; height: 1.1em; margin: 0 }
+.site-nav .icon-svg svg { width: 1.1em; height: 1.1em }
 
-html{scroll-behavior:smooth}
+/* --- the card's link row needs breathing room on narrow screens --------- */
+#card .card-inner ul { padding-left: 12px; padding-right: 12px }
+@media screen and (max-width: 600px) {
+  #card .card-inner ul { flex-wrap: wrap; row-gap: 22px; padding-bottom: 30px }
+  #card .card-inner ul li { flex: 0 0 33.333%; width: auto }
+}
+
+/* --- top nav --------------------------------------------------------- */
+body.with-nav { padding-top: 56px }
+.site-nav {
+  position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  background: rgba(34, 35, 37, .85);
+  backdrop-filter: saturate(120%) blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+.site-nav .nav-inner {
+  width: 100%; max-width: 900px; display: flex;
+  align-items: center; justify-content: space-between; padding: 0 16px;
+}
+.site-nav a {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: #b6b6b6; padding: 10px 12px; border-radius: 8px;
+  font-size: .8rem; letter-spacing: .02em;
+  transition: background .2s ease, color .2s ease;
+}
+.site-nav a:hover { background: rgba(255, 255, 255, .07); color: #fff }
+.site-nav .brand { color: #fff; font-weight: 600; letter-spacing: .02em; font-size: .85rem }
+.site-nav .right { display: flex; align-items: center }
+.site-nav .right a.active { background: #2f3033; color: #fff }
+@media screen and (max-width: 540px) {
+  .site-nav a { padding: 8px; font-size: .7rem }
+  .site-nav .brand { font-size: .75rem }
+}
+
+/* --- about section shell --------------------------------------------- */
+.about-section {
+  width: 100%; max-width: 860px; margin: 0 auto;
+  padding: 24px 16px 40px;
+  font-size: .8rem; line-height: 1.75; color: #c9ccd1;
+}
+.about-card {
+  background: #2b2c2f; border-radius: 12px;
+  padding: 24px 26px; margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, .04);
+}
+.about-card > h3 {
+  color: #fff; margin: 0 0 18px; font-weight: 600;
+  font-size: .95rem; letter-spacing: .06em; text-transform: uppercase;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, .09);
+}
+.about-card p { margin: 0 0 12px }
+.about-card p:last-child { margin-bottom: 0 }
+.about-card a { color: #8ab4f8; border-bottom: 1px solid rgba(138, 180, 248, .3) }
+.about-card a:hover { color: #aecbfa; border-bottom-color: #aecbfa }
+.about-card strong { color: #f1f3f4; font-weight: 600 }
+.about-card .lede { font-size: .86rem; color: #e3e5e8 }
+.about-card .muted { color: #9aa0a6 }
+
+/* --- an entry (publication / job / patent) --------------------------- */
+.entry { padding: 16px 0; border-top: 1px solid rgba(255, 255, 255, .06) }
+.entry:first-of-type { padding-top: 0; border-top: 0 }
+.entry:last-child { padding-bottom: 0 }
+.entry-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; margin-bottom: 6px;
+}
+.entry-title {
+  margin: 0; color: #fff; font-size: .88rem; font-weight: 600;
+  line-height: 1.5; flex: 1 1 auto;
+}
+.entry-title sup { font-size: .65em }
+.entry-sub { color: #b6b6b6; font-weight: 400 }
+.entry-date {
+  flex: 0 0 auto; color: #9aa0a6; font-size: .72rem;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.entry ul { margin: 8px 0 0; padding-left: 18px; list-style: disc }
+.entry ul li { margin-bottom: 6px }
+.entry ul li::marker { color: #6f7378 }
+@media screen and (max-width: 640px) {
+  .entry-head { flex-direction: column; gap: 2px }
+  .entry-date { order: -1 }
+}
+
+/* --- featured publication -------------------------------------------- */
+.entry-featured {
+  background: #303136; border-radius: 10px; padding: 18px 20px;
+  border: 1px solid rgba(138, 180, 248, .18); border-top: 0;
+}
+.entry-featured .entry-title { font-size: .95rem }
+
+/* --- tags ------------------------------------------------------------ */
+.entry-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px !important }
+.tag {
+  display: inline-block; padding: 3px 9px; border-radius: 999px;
+  background: #1f2022; color: #b6b6b6;
+  font-size: .68rem; letter-spacing: .02em; white-space: nowrap;
+}
+.tag-accent { background: rgba(138, 180, 248, .14); color: #aecbfa }
+
+/* --- result stats ---------------------------------------------------- */
+.entry ul.stats, .stats {
+  list-style: none; margin: 14px 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px;
+}
+.entry ul.stats li { margin-bottom: 0 }
+.entry ul.stats li::marker { content: none }
+.stats li {
+  background: #26272a; border-radius: 8px; padding: 12px 14px;
+  border-left: 2px solid rgba(138, 180, 248, .45);
+}
+.stat-num {
+  display: block; color: #fff; font-size: 1.05rem; font-weight: 600;
+  line-height: 1.2; font-variant-numeric: tabular-nums;
+}
+.stat-label { display: block; margin-top: 4px; color: #9aa0a6; font-size: .7rem; line-height: 1.45 }
+
+/* --- skills ---------------------------------------------------------- */
+.skills { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 10px 22px }
+.skills dt { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap }
+.skills dd { margin: 0; color: #c9ccd1 }
+@media screen and (max-width: 640px) {
+  .skills { grid-template-columns: 1fr; gap: 2px 0 }
+  .skills dd { margin-bottom: 10px }
+}
+
+/* --- footer ---------------------------------------------------------- */
+.site-footer { text-align: center; padding: 18px 0 8px; color: #9aa0a6; font-size: .72rem }
+.site-footer p { margin: 0 0 6px }
+.site-footer .footer-links { display: flex; justify-content: center; gap: 18px }
+.site-footer a { color: #b6b6b6 }
+.site-footer a:hover { color: #fff }
+
+/* --- the template's fixed-viewport mode has to relax once About opens - */
+body.about-open main { overflow: auto; height: auto }
+body.about-open .content-main { position: relative; height: auto; min-height: 100vh; padding-bottom: 24px }
+body.about-open .content { height: auto; min-height: 100vh }
+body.about-open #card { height: auto; min-height: 100vh }
+
+html { scroll-behavior: smooth }
