@@ -112,16 +112,16 @@
                         My work so far has been <strong>data-centric</strong>: deciding which training examples are worth
                         keeping, before any model is trained on them. My most recent project,
                         <a href="#publications">RMD<sup>2</sup></a>, scores how well a sample fits the class it was
-                        labelled with — using only a small trusted reference set and a frozen encoder — and reuses that
+                        labelled with, using only a small trusted reference set and a frozen encoder, and reuses that
                         one signal for three jobs: ranking noisy candidates, constraining a continuous generator, and
                         building preference pairs for a language model, without training a task-specific proxy for any
                         of them.
                     </p>
                     <p>
-                        I am also interested in <strong>continual learning</strong>: how a model keeps taking in new
-                        knowledge without overwriting what it already has, and how the choice of training data decides
-                        what survives. To me it is the same question as curation seen from the other side — curation
-                        asks what is worth learning, continual learning asks what is worth keeping.
+                        I am also interested in <strong>continual learning</strong>: for catastrophic forgetting. Teach one something new and it tends to lose what it already knew. Architectures have turned over many times since, and the problem has not moved. I don't think that's an accident. Any system with finite capacity, trained by gradient updates, facing data that keeps changing, runs into the same conflict: the adjustments that make room for new knowledge are exactly the ones that disturb the structure the old knowledge rested on.
+                        So I don't treat lifelong learning as a particular kind of application. How a system holds onto what it can already do while it keeps taking in new information is a basic property of it as a learning system. Train once and never again is the special case, a simplification we adopted for convenience and have used so long that it stopped looking like a choice.
+                        Keeping knowledge outside the model and retrieving it on demand is one way around this. It works well in plenty of settings, but every use pays the reading cost again, and that cost grows with the amount of knowledge. It also means giving up on the weights. A model has an enormous amount of room in its parameters, room that ought to be carrying and organising knowledge, and because we are reluctant to touch it, most of it sits idle.
+                        What I actually want to understand is which knowledge survives, and why.
                     </p>
                     <p class="muted">
                         I am looking for a PhD position starting in 2027. If this overlaps with your group's work,
