@@ -110,18 +110,19 @@
                     </p>
                     <p>
                         My work so far has been <strong>data-centric</strong>: deciding which training examples are worth
-                        keeping, before any model is trained on them. My most recent project,
+                        keeping before any model is trained on them, and doing it cheaply enough to re-run every time
+                        the data pool changes. My most recent project,
                         <a href="#publications">RMD<sup>2</sup></a>, scores how well a sample fits the class it was
-                        labelled with, using only a small trusted reference set and a frozen encoder, and reuses that
+                        labelled with — using only a small trusted reference set and a frozen encoder — and reuses that
                         one signal for three jobs: ranking noisy candidates, constraining a continuous generator, and
                         building preference pairs for a language model, without training a task-specific proxy for any
                         of them.
                     </p>
                     <p>
-                        I am also interested in <strong>continual learning</strong>: for catastrophic forgetting. Teach one something new and it tends to lose what it already knew. Architectures have turned over many times since, and the problem has not moved. I don't think that's an accident. Any system with finite capacity, trained by gradient updates, facing data that keeps changing, runs into the same conflict: the adjustments that make room for new knowledge are exactly the ones that disturb the structure the old knowledge rested on.
-                        So I don't treat lifelong learning as a particular kind of application. How a system holds onto what it can already do while it keeps taking in new information is a basic property of it as a learning system. Train once and never again is the special case, a simplification we adopted for convenience and have used so long that it stopped looking like a choice.
-                        Keeping knowledge outside the model and retrieving it on demand is one way around this. It works well in plenty of settings, but every use pays the reading cost again, and that cost grows with the amount of knowledge. It also means giving up on the weights. A model has an enormous amount of room in its parameters, room that ought to be carrying and organising knowledge, and because we are reluctant to touch it, most of it sits idle.
-                        What I actually want to understand is which knowledge survives, and why.
+                        I am also interested in <strong>continual learning</strong>: how a model keeps taking in new
+                        knowledge without overwriting what it already has, and how the choice of training data decides
+                        what survives. To me it is the same question as curation seen from the other side — curation
+                        asks what is worth learning, continual learning asks what is worth keeping.
                     </p>
                     <p class="muted">
                         I am looking for a PhD position starting in 2027. If this overlaps with your group's work,
@@ -138,22 +139,28 @@
                         </div>
                         <p class="entry-meta">
                             <span class="tag tag-accent">Co-first author</span>
-                            <span class="tag">Under review — AAAI 2027</span>
+                            <span class="tag">Under review — VLDB 2027 (PVLDB)</span>
                         </p>
                         <p>
-                            A class-conditional conformity measure that needs <strong>no task-proxy training</strong>.
-                            For each class we fit an MRCD robust covariance and a regularised precision matrix on a small
-                            trusted reference set in a frozen embedding space; an <strong>inter-class Mahalanobis
-                            margin</strong> — rather than an absolute distance — decides whether a sample agrees with the
-                            label it was given. The same fitted statistics then expose three interfaces: the margin ranks
-                            candidates for curation and for discrete preference pairs, while the analytic gradient of the
-                            within-class distance constrains continuous generators.
+                            A <strong>low-cost curation operator</strong> for large data pipelines. Class statistics — an
+                            MRCD robust covariance and a regularised precision matrix — are fitted <strong>once</strong>
+                            from a small trusted reference set in a frozen embedding space; after that, scoring a
+                            candidate is one encoder pass and one quadratic form, <em>O(NDk)</em>, with
+                            <strong>no task-proxy model trained anywhere in the loop</strong>. An inter-class Mahalanobis
+                            margin, rather than an absolute distance, decides whether a sample agrees with the label it
+                            was given.
+                        </p>
+                        <p>
+                            The fitted statistics are cached and reused — across pool refreshes, across downstream tasks,
+                            and even when the pipeline switches from selecting data to generating it. The same cached
+                            object lowers conditional-GAN FID by 11.0% and KID by 18%, and as a DPO preference signal it
+                            raises augmentation accuracy by up to 1.22 points, with no second scorer to train.
                         </p>
                         <ul class="stats">
-                            <li><span class="stat-num">98.8 / 99.9%</span><span class="stat-label">detection AUROC on CIFAR-10N / CLINC150</span></li>
-                            <li><span class="stat-num">0.56 / 0.02%</span><span class="stat-label">residual noise left in the selected set</span></li>
-                            <li><span class="stat-num">19.7&times;</span><span class="stat-label">less peak memory than the runner-up; fastest of eight methods</span></li>
-                            <li><span class="stat-num">&minus;11.0%</span><span class="stat-label">FID when the same signal guides a conditional GAN</span></li>
+                            <li><span class="stat-num">69s / 47s</span><span class="stat-label">end-to-end on CIFAR-10N / CLINC150 — fastest of eight compared methods</span></li>
+                            <li><span class="stat-num">19.7&times;</span><span class="stat-label">less peak memory than the runner-up; proxy-based attribution costs 2–3 orders of magnitude more time</span></li>
+                            <li><span class="stat-num">98.8 / 99.9%</span><span class="stat-label">detection AUROC, leaving 0.56% / 0.02% residual noise in the selected set</span></li>
+                            <li><span class="stat-num">+11.2–15.4</span><span class="stat-label">downstream accuracy points over reference-only training</span></li>
                         </ul>
                     </article>
                 </div>
@@ -186,7 +193,7 @@
                             <span class="entry-date">2026.03 – 2026.07</span>
                         </div>
                         <ul>
-                            <li>Method design, experiments and paper writing for the RMD<sup>2</sup> framework, submitted to AAAI 2027.</li>
+                            <li>Method design, experiments and paper writing for the RMD<sup>2</sup> framework, submitted to VLDB 2027.</li>
                             <li>Replacing the absolute Mahalanobis distance with an inter-class margin raised detection AUROC on CIFAR-10N from 91.98 to 98.84, so that hard but correctly labelled samples are no longer discarded.</li>
                             <li>Built a two-modality pipeline (DINOv2-ViT-S/14, BGE-large-en-v1.5, ResNet-9, BERT-base, Qwen2.5-1.5B with LoRA/DPO) and benchmarked it on 4&times;RTX A5000 against IF, TRAK, LESS, DataInf, SimiFeat, LAVA, CLIP and ImageReward under identical splits.</li>
                         </ul>
