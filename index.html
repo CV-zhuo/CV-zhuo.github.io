@@ -145,23 +145,19 @@
                             A <strong>low-cost curation operator</strong> for large data pipelines. Class statistics — an
                             MRCD robust covariance and a regularised precision matrix — are fitted <strong>once</strong>
                             from a small trusted reference set in a frozen embedding space; after that, scoring a
-                            candidate is one encoder pass and one quadratic form, <em>O(NDk)</em>, with
+                            candidate is one encoder pass and one quadratic form, with
                             <strong>no task-proxy model trained anywhere in the loop</strong>. An inter-class Mahalanobis
                             margin, rather than an absolute distance, decides whether a sample agrees with the label it
                             was given.
                         </p>
                         <p>
                             The fitted statistics are cached and reused — across pool refreshes, across downstream tasks,
-                            and even when the pipeline switches from selecting data to generating it. The same cached
-                            object lowers conditional-GAN FID by 11.0% and KID by 18%, and as a DPO preference signal it
-                            raises augmentation accuracy by up to 1.22 points, with no second scorer to train.
+                            and even when the pipeline switches from selecting data to generating it, where the same
+                            cached object constrains a conditional GAN and supplies preference pairs for a language
+                            model, with no second scorer to train. Evaluated on vision and language noisy-label
+                            benchmarks against both proxy-based data-attribution methods and proxy-free feature-space
+                            selectors under identical splits.
                         </p>
-                        <ul class="stats">
-                            <li><span class="stat-num">69s / 47s</span><span class="stat-label">end-to-end on CIFAR-10N / CLINC150 — fastest of eight compared methods</span></li>
-                            <li><span class="stat-num">19.7&times;</span><span class="stat-label">less peak memory than the runner-up; proxy-based attribution costs 2–3 orders of magnitude more time</span></li>
-                            <li><span class="stat-num">98.8 / 99.9%</span><span class="stat-label">detection AUROC, leaving 0.56% / 0.02% residual noise in the selected set</span></li>
-                            <li><span class="stat-num">+11.2–15.4</span><span class="stat-label">downstream accuracy points over reference-only training</span></li>
-                        </ul>
                     </article>
                 </div>
 
@@ -194,8 +190,8 @@
                         </div>
                         <ul>
                             <li>Method design, experiments and paper writing for the RMD<sup>2</sup> framework, targeting PVLDB.</li>
-                            <li>Replacing the absolute Mahalanobis distance with an inter-class margin raised detection AUROC on CIFAR-10N from 91.98 to 98.84, so that hard but correctly labelled samples are no longer discarded.</li>
-                            <li>Built a two-modality pipeline (DINOv2-ViT-S/14, BGE-large-en-v1.5, ResNet-9, BERT-base, Qwen2.5-1.5B with LoRA/DPO) and benchmarked it on 4&times;RTX A5000 against IF, TRAK, LESS, DataInf, SimiFeat, LAVA, CLIP and ImageReward under identical splits.</li>
+                            <li>Key design: replacing the absolute Mahalanobis distance with an inter-class margin as the label-consistency criterion, so that hard but correctly labelled samples are no longer discarded; ablations identify this as the main source of detection performance.</li>
+                            <li>Built a two-modality pipeline (DINOv2-ViT-S/14, BGE-large-en-v1.5, ResNet-9, BERT-base, Qwen2.5-1.5B with LoRA/DPO) on 4&times;RTX A5000, benchmarked under identical splits against both proxy-based data-attribution methods and proxy-free feature-space selectors.</li>
                         </ul>
                     </article>
                     <article class="entry">
@@ -228,7 +224,7 @@
                     </article>
                     <article class="entry">
                         <div class="entry-head">
-                            <h4 class="entry-title">PLA Navy, Northern Theater Command <span class="entry-sub">— Soldier, compulsory military service</span></h4>
+                            <h4 class="entry-title">PLA Northern Theater Command Navy <span class="entry-sub">— Soldier, compulsory military service</span></h4>
                             <span class="entry-date">2019.09 – 2021.09</span>
                         </div>
                     </article>
