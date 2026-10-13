@@ -176,3 +176,20 @@ body.about-open .content { height: auto; min-height: 100vh }
 body.about-open #card { height: auto; min-height: 100vh }
 
 html { scroll-behavior: smooth }
+
+/* --- education: second line (degree / dates) --------------------------- */
+.entry-sub-line {
+  margin: 0; flex: 1 1 auto;
+  color: #c9ccd1; font-size: .8rem; font-weight: 400; line-height: 1.5;
+}
+.entry-head + .entry-head { margin-top: 2px }
+
+/* --- awards list ------------------------------------------------------- */
+.awards { list-style: disc; margin: 0; padding-left: 18px }
+.awards li { margin-bottom: 6px }
+.awards li:last-child { margin-bottom: 0 }
+.awards li::marker { color: #6f7378 }
+
+/* --- one-line entry (no description) ----------------------------------- */
+.entry-compact { padding: 10px 0 }
+.entry-compact .entry-head { margin-bottom: 0 }
